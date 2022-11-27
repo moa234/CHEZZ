@@ -2,5 +2,5 @@
 - CHEZZ game rebuilt using assembly
 - 8086 processor game
 
-# requirements
+## requirements
 - masm v5 (or tasm)
