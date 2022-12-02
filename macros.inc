@@ -58,9 +58,9 @@ ReadString macro buffer
 	int 21h
 
     ;set last charachter in input buffer to null
-    mov bl,str+1
+    mov bl,buffer+1
     mov bh,0
-    mov byte ptr bx[str+2],'$'
+    mov byte ptr bx[buffer+2],'$'
 endm ReadString
 ;============================================================================================
 
