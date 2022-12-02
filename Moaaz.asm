@@ -20,7 +20,7 @@ main proc far
     ;mov dx,5
     ;mov al,1
     ;int 10h
-    DrawRook 0,0
+    DrawRook 32150
 
     ReadString InDATA
 

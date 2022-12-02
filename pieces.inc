@@ -97,4 +97,4 @@ DrawRook MACRO   X
 
     pop es
     pop ax
-ENDM MOVECURSOR
+ENDM DrawRook
