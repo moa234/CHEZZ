@@ -20,7 +20,8 @@ main proc far
     ;mov dx,5
     ;mov al,1
     ;int 10h
-    DrawRook 32150
+    DrawRookBlue 32150
+    DrawRookRed 30000
 
     ReadString InDATA
 
