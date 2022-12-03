@@ -2,6 +2,8 @@ DrawRook MACRO   X,maincolor,shadowcolor
     push ax
     push es
     push di
+    push cx
+    pushf
 
     mov     ax,0A000h
     mov     es,ax
@@ -192,6 +194,8 @@ DrawRook MACRO   X,maincolor,shadowcolor
     mov cx,13
     rep stosb
 
+    popf
+    pop cx
     pop di
     pop es
     pop ax
@@ -201,6 +205,8 @@ DrawKnight MACRO   X,maincolor,shadowcolor
     push ax
     push es
     push di
+    push cx
+    pushf
 
     mov     ax,0A000h
     mov     es,ax
@@ -400,8 +406,205 @@ DrawKnight MACRO   X,maincolor,shadowcolor
     mov al,shadowcolor
     stosb
 
-
+    popf
+    pop cx
     pop di
     pop es
     pop ax
-ENDM DrawRook
+ENDM DrawKnight
+
+DrawPawn MACRO   X,maincolor,shadowcolor
+    push ax
+    push es
+    push di
+    push cx
+    pushf
+    
+    mov     ax,0A000h
+    mov     es,ax
+
+    cld
+
+    mov di,x
+    add di,11
+    add di,7*320
+
+    ;row 1
+    mov al,maincolor
+    mov cx,3
+    rep stosb
+
+    ;row 2
+    add di,320
+    std
+    mov al,maincolor
+    mov cx,4
+    rep stosb
+    mov al,shadowcolor
+    stosb
+
+    ;row 3
+    add di,321
+    cld
+    mov al,shadowcolor
+    stosb
+    mov al,maincolor
+    mov cx,4
+    rep stosb
+
+    ;row 4
+    add di,319
+    std
+    mov al,maincolor
+    mov cx,4
+    rep stosb
+    mov al,shadowcolor
+    stosb
+
+    ;row 5
+    add di,322
+    cld
+    mov al,shadowcolor
+    stosb
+    mov al,maincolor
+    mov cx,2
+    rep stosb
+
+    ;row 6
+    add di,320
+    std
+    mov al,maincolor
+    mov cx,4
+    rep stosb
+    mov al,shadowcolor
+    stosb
+
+    ;row 7
+    add di,322
+    cld
+    mov al,shadowcolor
+    mov cx,3
+    rep stosb
+
+    ;row 8
+    add di,319
+    std
+    mov al,maincolor
+    mov cx,2
+    rep stosb
+    mov al,shadowcolor
+    stosb
+
+    ;row 9
+    add di,320
+    cld
+    mov al,shadowcolor
+    stosb
+    mov al,maincolor
+    mov cx,4
+    rep stosb
+
+    ;row 10
+    add di,319
+    std
+    mov al,maincolor
+    mov cx,4
+    rep stosb
+    mov al,shadowcolor
+    stosb
+
+    ;row 11
+    add di,320
+    cld
+    mov al,shadowcolor
+    stosb
+    mov al,maincolor
+    mov cx,6
+    rep stosb
+
+    ;row 12
+    add di,319
+    std
+    mov al,maincolor
+    mov cx,6
+    rep stosb
+    mov al,shadowcolor
+    stosb
+
+    ;row 13
+    add di,322
+    cld
+    mov al,shadowcolor
+    mov cx,5
+    rep stosb
+
+    ;row 14
+    add di,321
+    std
+    mov al,maincolor
+    mov cx,7
+    rep stosb
+    mov al,shadowcolor
+    mov cx,2
+    rep stosb
+
+    ;row 15
+    add di,320
+    cld
+    mov al,shadowcolor
+    stosb
+    mov al,maincolor
+    mov cx,10
+    rep stosb
+
+    popf
+    pop cx
+    pop di
+    pop es
+    pop ax
+ENDM DrawPawn
+
+DrawBishop MACRO   X,maincolor,shadowcolor
+    push ax
+    push es
+    push di
+    push cx
+    pushf
+    
+
+    popf
+    pop cx
+    pop di
+    pop es
+    pop ax
+ENDM DrawBishop
+
+DrawQueen MACRO   X,maincolor,shadowcolor
+    push ax
+    push es
+    push di
+    push cx
+    pushf
+    
+
+    popf
+    pop cx
+    pop di
+    pop es
+    pop ax
+ENDM DrawQueen
+
+DrawKing MACRO   X,maincolor,shadowcolor
+    push ax
+    push es
+    push di
+    push cx
+    pushf
+    
+
+    popf
+    pop cx
+    pop di
+    pop es
+    pop ax
+ENDM DrawKing
