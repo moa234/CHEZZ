@@ -24,8 +24,8 @@ main proc far
     ;mov dx,5
     ;mov al,1
     ;int 10h
-    DrawRook 32150,9h,1h
-    DrawRook 30000,0ch,4h
+    DrawKnight 32150,9h,1h
+    DrawKnight 30000,0ch,4h
     DrawRook 10000,0Dh,5h
     DrawRook 20000,0Bh,3h
     DrawRook 40000,0Ah,2h
