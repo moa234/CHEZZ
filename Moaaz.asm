@@ -15,7 +15,7 @@ main proc far
     
     GraphicsMode
     mov ax,0700h
-    mov bh,07h
+    mov bh,0fh
     mov cx,0
     mov dx,1827H
     int 10h
@@ -24,12 +24,14 @@ main proc far
     ;mov dx,5
     ;mov al,1
     ;int 10h
-    DrawKnight 30225,9h,1h
-    DrawKnight 30100,0ch,4h
-    DrawRook 30125,9h,1h
-    DrawRook 30150,0ch,4h
-    DrawPawn 30175,9h,1h
-    DrawPawn 30200,0ch,4h
+    DrawKnight 0,9h,1h
+    DrawKnight 25,0ch,4h
+    DrawRook 50,9h,1h
+    DrawRook 75,0ch,4h
+    DrawPawn 100,9h,1h
+    DrawPawn 125,0ch,4h
+    DrawBishop 150,9h,1h
+    DrawBishop 175,0ch,4h
     
 
     ReadString InDATA
