@@ -32,6 +32,10 @@ main proc far
     DrawPawn 125,0ch,4h
     DrawBishop 150,9h,1h
     DrawBishop 175,0ch,4h
+    DrawQueen 200,9h,1h
+    DrawQueen 225,0ch,4h
+    DrawKing 250,9h,1h
+    DrawKing 275,0ch,4h
     
 
     ReadString InDATA
