@@ -24,18 +24,19 @@ main proc far
     ;mov dx,5
     ;mov al,1
     ;int 10h
-    DrawKnight 0,9h,1h
-    DrawKnight 25,0ch,4h
-    DrawRook 50,9h,1h
-    DrawRook 75,0ch,4h
-    DrawPawn 100,9h,1h
-    DrawPawn 125,0ch,4h
-    DrawBishop 150,9h,1h
-    DrawBishop 175,0ch,4h
-    DrawQueen 200,9h,1h
-    DrawQueen 225,0ch,4h
-    DrawKing 250,9h,1h
+    DrawRook 0,9h,1h
+    DrawKnight 25,9h,1h
+    DrawBishop 50,9h,1h
+    DrawQueen 75,9h,1h
+    DrawKing 100,9h,1h
+    DrawBishop 125,0ch,4h
+    DrawKnight 150,0ch,4h
+    DrawRook 175,0ch,4h
+    DrawPawn 200,9h,1h
+    DrawPawn 225,0ch,4h
+    DrawQueen 250,0ch,4h
     DrawKing 275,0ch,4h
+    DisplayString mes
     
 
     ReadString InDATA

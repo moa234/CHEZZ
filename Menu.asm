@@ -178,7 +178,9 @@ jmp myloop
 
     exit:
     
-
+    MOV AH, 4CH
+    MOV AL, 00 ;your return code.
+    INT 21H
    
 ;SHOULD MAKE A PATH FROM MYLOOP TO THE GAME WHEN THE OTHER USER ACCEPTS THE INVITATION [SIMULATED IN PHASE 1]
 
