@@ -1,6 +1,7 @@
 include macros.inc
 include pieces.inc
 .model small
+.286
 .data
 num dw 3456
 mes db 'This is message','$'
@@ -15,7 +16,7 @@ main proc far
     
     GraphicsMode
     mov ax,0700h
-    mov bh,0fh
+    mov bh,7h
     mov cx,0
     mov dx,1827H
     int 10h
