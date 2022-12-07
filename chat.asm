@@ -44,7 +44,7 @@ chat endp
 chatinitialize proc
 
     TEXTMODE
-    SelectVideoPage 1
+    SelectVideoPage 2
     clearscreen
 
     MOVECURSORINCHAT 0C00h
@@ -66,19 +66,31 @@ chatinitialize proc
 chatinitialize endp
 
 sendchat proc
-    
+
+    cmp byte ptr [thiscurs]+1, 0ch
+    jnz noscroll
+    scrollup 0100h,0b79h
+    mov thiscurs, 0b06h
+    noscroll:
+
     MOVECURSORINCHAT thiscurs
     GetKeyPress
+    jnz nokey
+    ret
+    nokey:
     mov bufferscancode, AH
     mov bufferascii, AL
     clearbuffer
-    jz nokey
+    
     
     cmp bufferscancode,3dh
     jz endchat
 
     cmp bufferascii,0dh ;enter
     jz displayenter
+
+    cmp bufferascii,08h ;backspace
+    jz backspace
 
     DisplayChar bufferascii
     
@@ -89,13 +101,26 @@ sendchat proc
     mov byte ptr [thiscurs], 6
     add byte ptr [thiscurs]+1, 1
     endofline:
+    ret 
+
+    backspace:
+        dec thiscurs
+        cmp byte ptr [thiscurs], 5
+        jnz endofline2
+        ;dec byte ptr [thiscurs]+1             ;to go to the previous line if needed
+        mov byte ptr [thiscurs], 6
+    endofline2:
+        MOVECURSORINCHAT thiscurs
+        DisplayChar 0
+    ret
 
     ;TODO: send to other player
-    jmp nokey
+    
+    ;check cursor to scroll
+    
 
     endchat:
         mov chatendflag,1
-    nokey:
     ret
 sendchat endp
 

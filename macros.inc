@@ -10,6 +10,18 @@ clearscreen MACRO
 ENDM clearscreen
 ;============================================================================================
 
+;====================scrollup=============================================================
+scrollup MACRO from,to
+    pusha
+    mov ax,0601h
+    mov bh,07
+    mov cx,from
+    mov dx,to
+    int 10h
+    popa
+ENDM scrollup
+;============================================================================================
+
 ;====================select video page=============================================================
 SelectVideoPage MACRO page
     pusha
@@ -30,7 +42,7 @@ ENDM GetKeyPress
 ;=====================clearbuffer==========================================================
 clearbuffer MACRO
     pusha
-    mov al,0
+    mov al,00h
 	mov ah,0CH
 	int 21h
     POPa
@@ -69,15 +81,23 @@ MOVECURSOR MACRO   X,Y
 ENDM MOVECURSOR
 ;============================================================================================
 
+;================================getCURSORPOSITION=========================================
+GETCURSORPOSINCHAT MACRO
+    MOV AH,3
+	MOV BH,2
+	INT 10H
+ENDM GETCURSORPOSINCHAT
+;============================================================================================
+
 ;================================MOVECURSORPOSITION=========================================
 MOVECURSORINCHAT MACRO   pos
     pusha
     MOV AH,2
-	MOV BH,1
+	MOV BH,2
 	MOV DX,pos
 	INT 10H
     popa
-ENDM MOVECURSOR
+ENDM MOVECURSORINCHAT
 ;============================================================================================
 
 ;=======================================DisplayString========================================
