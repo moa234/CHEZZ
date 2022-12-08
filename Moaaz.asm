@@ -1,5 +1,5 @@
-include macros.inc
-include pieces.inc
+
+
 .model small
 .286
 .data
@@ -7,7 +7,11 @@ num dw 3456
 mes db 'This is message','$'
 InDATA db 6,?,6 dup('$')
 Innum db 5,?,4 dup('$')
+currpos dw 0
 
+include pieces.inc
+include macros.inc
+include gameui.inc
 .code
 main proc far
     ;set ds
@@ -20,24 +24,8 @@ main proc far
     mov cx,0
     mov dx,1827H
     int 10h
-    ;mov ah,0ch
-    ;mov cx,8
-    ;mov dx,5
-    ;mov al,1
-    ;int 10h
-    DrawRook 0,9h,1h
-    DrawKnight 25,9h,1h
-    DrawBishop 50,9h,1h
-    DrawQueen 75,9h,1h
-    DrawKing 100,9h,1h
-    DrawBishop 125,0ch,4h
-    DrawKnight 150,0ch,4h
-    DrawRook 175,0ch,4h
-    DrawPawn 200,9h,1h
-    DrawPawn 225,0ch,4h
-    DrawQueen 250,0ch,4h
-    DrawKing 275,0ch,4h
-    DisplayString mes
+
+    call initializegame
     
 
     ReadString InDATA
