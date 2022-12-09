@@ -50,11 +50,11 @@ GetKeyPress MACRO
 ENDM GetKeyPress
 ;============================================================================================
 
-GetPixelColour MACRO col,row
-    mov cx,col
-    add cx,3
-    mov dx,row
-    add dx,3
+GetPixelColour MACRO pcol,prow
+    mov cx,pcol
+    add cx,2
+    mov dx,prow
+    add dx,2
     mov ah,0dh
     int 10h
 ENDM GetPixelColour

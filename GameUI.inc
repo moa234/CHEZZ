@@ -11,6 +11,10 @@ initializegame proc
     call drawboard
     call initializepieces
     mov currpos,320*25*3+25*3
+    mov col,3
+    mov row,3
+    mov pixelcol,3*25
+    mov pixelrow,3*25
     call drawborder
 
     ret

@@ -124,7 +124,7 @@ deleteborder proc
     
     mov di,currpos
 
-    GetPixelColour col,row
+    GetPixelColour pixelcol,pixelrow
     ;mov al,[es:di]
 
     
@@ -159,3 +159,26 @@ deleteborder proc
     popa
     ret
 deleteborder ENDP
+
+highlightbox proc
+    pusha
+    mov     ax,0A000h
+    mov     es,ax
+    
+    cld
+
+    MOV DI,highlightpos
+    add di,3+320*3
+    mov dx,19
+    mov al,0ah
+    backhighlight:
+        mov cx,19
+        rep stosb
+        add di,320-19
+        dec DX
+    jnz backhighlight
+
+    popa
+    ret
+highlightbox ENDP
+
