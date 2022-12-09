@@ -1488,7 +1488,7 @@ DrawQueenBlue proc
     cld
 
     mov di,currpos
-    add di,13
+    add di,12
     add di,3*320
 
     ;row 1
@@ -1667,7 +1667,7 @@ DrawQueenRed proc
     cld
 
     mov di,currpos
-    add di,13
+    add di,12
     add di,3*320
 
     ;row 1
@@ -1846,7 +1846,7 @@ DrawKingBlue proc
     cld
 
     mov di,currpos
-    add di,13
+    add di,12
     add di,2*320
 
     ;row 1
@@ -2027,7 +2027,7 @@ DrawKingRed proc
     cld
 
     mov di,currpos
-    add di,13
+    add di,12
     add di,2*320
 
     ;row 1

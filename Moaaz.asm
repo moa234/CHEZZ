@@ -1,5 +1,3 @@
-
-
 .model small
 .286
 .data
@@ -8,10 +6,12 @@ mes db 'This is message','$'
 InDATA db 6,?,6 dup('$')
 Innum db 5,?,4 dup('$')
 currpos dw 0
+row dw 0
+col dw 0
 
-include pieces.inc
 include macros.inc
 include gameui.inc;comment from aley
+include gamelog.inc
 .code
 main proc far
     ;set ds
@@ -25,7 +25,13 @@ main proc far
     mov dx,1827H
     int 10h
 
+
+    
     call initializegame
+    whiletrue:
+        call traversecell
+    jmp whiletrue
+
     
 
     ReadString InDATA

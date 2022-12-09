@@ -1,76 +1,8 @@
 
+include pieces.inc
+include board.inc
 .code
 
-drawboxwhite proc
-    pusha
-    mov     ax,0A000h
-    mov     es,ax
-    
-    cld
-
-    MOV DI,currpos
-    mov dx,25
-    mov al,0fh
-
-    back:
-        mov cx,25
-        rep stosb
-        add di,320-25
-        dec DX
-    jnz back
-
-    POPa
-
-    ret
-drawboxwhite ENDP
-
-drawboxgrey proc
-    pusha
-    mov     ax,0A000h
-    mov     es,ax
-    
-    cld
-
-    MOV DI,currpos
-    mov dx,25
-    mov al,7h
-    backgrey:
-        mov cx,25
-        rep stosb
-        add di,320-25
-        dec DX
-    jnz backgrey
-
-    popa
-    ret
-drawboxgrey ENDP
-
-drawboard proc    
-
-    rows:
-        mov cx,4
-        row1:
-            call drawboxwhite
-            add currpos,25
-            call drawboxgrey
-            add currpos,25
-        loop row1
-
-        mov cx,4
-        add currpos,320*25-25*8
-        row2:
-            call drawboxgrey
-            add currpos,25
-            call drawboxwhite
-            add currpos,25
-        loop row2
-
-        add currpos,320*25-25*8
-        cmp currpos,320*25*8
-    jnz rows
-    
-    ret
-drawboard ENDP
 
 initializegame proc
     
@@ -78,6 +10,8 @@ initializegame proc
 
     call drawboard
     call initializepieces
+    mov currpos,320*25*3+25*3
+    call drawborder
 
     ret
 initializegame ENDP
