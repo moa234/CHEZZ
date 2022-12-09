@@ -11,7 +11,7 @@ currpos dw 0
 
 include pieces.inc
 include macros.inc
-include gameui.inc
+include gameui.inc;comment from aley
 .code
 main proc far
     ;set ds
