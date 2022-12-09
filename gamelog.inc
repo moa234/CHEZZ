@@ -77,48 +77,60 @@ traversecell endp
 
 
 movefromcelltocell proc
-pusha
-mov bx,row
-mov ax,8
-mul bx
-mov bx,ax  ;bx store row*8
-mov si,col ;SI store  col
-mov oldcol,si
-mov oldrow,bx
-cmp movingopflag,1
-je movingflagon
+    pusha
+    mov bx,row
+    mov ax,8
+    mul bx
+    mov bx,ax  ;bx store row*8
+    mov si,col ;SI store  col
+    
+    cmp movingopflag,1
+    je movingflagon
 
-cmp board[bx][si],0   ;moving flag =0 and no piece in this square so do nothing
-je nomovingneeded
+    cmp board[bx][si],0   ;moving flag =0 and no piece in this square so do nothing
+    je nomovingneeded
 
-mov di,1
-mov movingopflag,di
-mov di,currpos
-mov oldcurrpos,di
-jmp nomovingneeded  ;we set moving flag as moving flag =0 and there is a piece in this square
+    
 
-movingflagon:
-mov bx,row
-mov ax,8
-mul bx
-mov bx,ax  ;bx store row*8
-mov si,col ;SI store  col
-cmp board[bx][si],0
-jne nomovingneeded
+    mov di,1
+    mov movingopflag,di
+    jmp nomovingneeded  ;we set moving flag as moving flag =0 and there is a piece in this square
 
-mov board[bx][si],1
-mov bx,oldrow
-mov si,oldcol
-mov board[bx][si],0
-;delete pawn at  old position
-call DrawPawnBlue
+    movingflagon:
+    mov bx,row
+    mov ax,8
+    mul bx
+    mov bx,ax  ;bx store row*8
+    mov si,col ;SI store  col
+    cmp board[bx][si],6
+    ja movingneeded
+    cmp board[bx][si],0
+    je movingneeded
+    jmp nomovingneeded
 
-mov di,0
-mov movingopflag,di
+    movingneeded:
+    mov al,selectedpiece
+    mov board[bx][si],al
+    call drawSelectedBluePiece
 
-nomovingneeded:
-popa
-ret
+    mov bx,selectedrow
+    mov ax,8
+    mul bx
+    mov bx,ax  ;bx store row*8
+    mov si,selectedcol
+
+    mov dl,0
+    mov board[bx][si],dl
+    ;delete pawn at  old position
+    
+
+    mov dx,0
+    mov movingopflag,dx
+    mov selectedpiece,dl
+
+    nomovingneeded:
+    popa
+    ret
 movefromcelltocell endp
 
 highlightpawn proc
@@ -211,6 +223,8 @@ checkpiece endp
 selection proc
     pusha
 
+    cmp movingopflag,1
+    je secondq
     mov ax,currpos
     mov selectedpos,ax
     MOV ax,col
@@ -229,7 +243,7 @@ selection proc
     mov si,col
     mov al,board[bx][si]
     mov selectedpiece,al
-
+    secondq:
     popa
     ret
 selection endp
