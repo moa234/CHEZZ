@@ -74,6 +74,53 @@ traversecell proc
     ret
 traversecell endp
 
+
+
+movefromcelltocell proc
+pusha
+mov bx,row
+mov ax,8
+mul bx
+mov bx,ax  ;bx store row*8
+mov si,col ;SI store  col
+mov oldcol,si
+mov oldrow,bx
+cmp movingopflag,1
+je movingflagon
+
+cmp board[bx][si],0   ;moving flag =0 and no piece in this square so do nothing
+je nomovingneeded
+
+mov di,1
+mov movingopflag,di
+mov di,currpos
+mov oldcurrpos,di
+jmp nomovingneeded  ;we set moving flag as moving flag =0 and there is a piece in this square
+
+movingflagon:
+mov bx,row
+mov ax,8
+mul bx
+mov bx,ax  ;bx store row*8
+mov si,col ;SI store  col
+cmp board[bx][si],0
+jne nomovingneeded
+
+mov board[bx][si],1
+mov bx,oldrow
+mov si,oldcol
+mov board[bx][si],0
+;delete pawn at  old position
+call DrawPawnBlue
+
+mov di,0
+mov movingopflag,di
+
+nomovingneeded:
+popa
+ret
+movefromcelltocell endp
+
 highlightpawn proc
     pusha
     

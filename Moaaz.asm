@@ -20,13 +20,18 @@ selectedpixelrow dw 0
 selectedpiece db 0
 ;--------------------------------------------------
 highlightpos dw 0
+;--------------------------------------------------
+oldcol dw 0
+oldrow dw 0
+movingopflag dw 0
+oldcurrpos dw 0
 
 board db 8,9,10,11,12,10,9,8
       db 7,7,7,7,7,7,7,7
-      db 0,0,1,0,0,0,0,0
-      db 0,0,1,1,0,0,0,0
-      db 0,0,0,0,1,0,0,0
-      db 0,0,0,0,0,1,0,0
+      db 0,0,0,0,0,0,0,0
+      db 0,0,0,0,0,0,0,0
+      db 0,0,0,0,0,0,0,0
+      db 0,0,0,0,0,0,0,0
       db 1,1,1,1,1,1,1,1
       db 6,5,4,3,2,4,5,6
      
@@ -58,8 +63,8 @@ main proc far
         selectcell:
         cmp al,'q'
         jne whiletrue
-
         call selection
+        call movefromcelltocell
         
         cmp selectedpiece,1
         je highpawn
