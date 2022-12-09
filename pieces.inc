@@ -9,9 +9,9 @@ drawSelectedRedPiece proc
     je Redknight
     cmp al,10
     je Redbishop
-    cmp al,12
-    je Redqueen
     cmp al,11
+    je Redqueen
+    cmp al,12
     je Redking
 
     Redpawn:
@@ -44,9 +44,9 @@ drawSelectedBluePiece proc
     je blueknight
     cmp al,4
     je bluebishop
-    cmp al,3
-    je bluequeen
     cmp al,2
+    je bluequeen
+    cmp al,3
     je blueking
 
     bluepawn:
