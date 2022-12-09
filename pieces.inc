@@ -1,4 +1,40 @@
 .code
+
+drawSelectedRedPiece proc
+    cmp al,7
+    je redpawn
+    cmp al,8
+    je redrook
+    cmp al,9
+    je redknight
+    cmp al,10
+    je redbishop
+    cmp al,11
+    je redqueen
+    cmp al,12
+    je redking
+
+    redpawn:
+        call DrawPawnRed
+        ret
+    redrook:
+        call DrawRookRed
+        ret
+    redknight:
+        call DrawKnightRed
+        ret
+    redbishop:
+        call DrawBishopRed
+        ret
+    redqueen:
+        call DrawQueenRed
+        ret
+    redking:    
+        call DrawKingRed
+
+    ret
+drawSelectedRedPiece endp
+
 DrawRookBlue PROC
     pusha
 

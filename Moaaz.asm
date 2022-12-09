@@ -5,24 +5,28 @@ num dw 3456
 mes db 'This is message','$'
 InDATA db 6,?,6 dup('$')
 Innum db 5,?,4 dup('$')
+;--------------------------------------------------
 currpos dw 0
 row dw 0
 col dw 0
 pixelrow dw 0
 pixelcol dw 0
+;--------------------------------------------------
 selectedpos dw 0
 selectedcol dw 0
 selectedrow dw 0
 selectedpixelcol dw 0
 selectedpixelrow dw 0
 selectedpiece db 0
+;--------------------------------------------------
 highlightpos dw 0
+
 board db 8,9,10,11,12,10,9,8
       db 7,7,7,7,7,7,7,7
-      db 0,0,0,0,0,0,0,0
-      db 0,0,0,0,0,0,0,0
-      db 0,0,0,0,0,0,0,0
-      db 0,0,0,0,0,0,0,0
+      db 0,0,1,0,0,0,0,0
+      db 0,0,1,1,0,0,0,0
+      db 0,0,0,0,1,0,0,0
+      db 0,0,0,0,0,1,0,0
       db 1,1,1,1,1,1,1,1
       db 6,5,4,3,2,4,5,6
      

@@ -78,16 +78,88 @@ highlightpawn proc
     pusha
     
     mov bx,currpos
+
     sub bx,320*25
     mov highlightpos,bx
-    call highlightbox
-    mov ax,currpos
-    sub ax,320*25*2
+    mov currpos,bx
+    call updaterowandcol
+
+    call checkpiece
+    cmp al,0
+    je nopiece
+    jmp pawnstart
+    nopiece:
+        call highlightbox
+
+    cmp selectedrow,6
+    jne pawnstart
+
+    mov bx,currpos
+    sub bx,320*25
+    mov currpos,bx
+    call updaterowandcol
+    mov highlightpos,bx
+
+    call checkpiece
+    cmp al,0
+    je nopiece2
+    jmp pawnstart
+    nopiece2:
+        call highlightbox
+    pawnstart:
+    
+    mov ax,selectedpos
+    mov currpos,ax
+    call updaterowandcol
+
+    sub ax,320*25-25
+    mov currpos,ax
+    call updaterowandcol
     mov highlightpos,ax
-    call highlightbox
+
+    call checkpiece
+    cmp al,6
+    ja enemypiece
+    jmp endhighpawn
+    enemypiece:
+        call highlightbox
+        call drawSelectedRedPiece
+
+    mov ax,currpos
+    sub ax,50
+    mov currpos,ax
+    call updaterowandcol
+    mov highlightpos,ax
+
+    call checkpiece
+    cmp al,6
+    ja enemypiece2
+    jmp endhighpawn
+    enemypiece2:
+        call highlightbox
+        call drawSelectedRedPiece
+    endhighpawn:
+
+    mov ax,selectedpos
+    mov currpos,ax
+    call updaterowandcol
+
     popa
     ret
 highlightpawn endp
+
+checkpiece proc
+
+    mov ax,row
+    mov bx,8
+    mul bx
+    mov bx,ax
+
+    mov si,col
+    mov al,board[bx][si]
+
+    ret
+checkpiece endp
 
 selection proc
     pusha
