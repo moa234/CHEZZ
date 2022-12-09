@@ -76,12 +76,7 @@ traversecell endp
 
 highlightpawn proc
     pusha
-    mov ax,currpos
-    mov selectedpos,ax
-    MOV ax,col
-    mov selectedcol,ax
-    mov ax,row
-    mov selectedrow,ax
+    
     mov bx,currpos
     sub bx,320*25
     mov highlightpos,bx
@@ -93,6 +88,32 @@ highlightpawn proc
     popa
     ret
 highlightpawn endp
+
+selection proc
+    pusha
+
+    mov ax,currpos
+    mov selectedpos,ax
+    MOV ax,col
+    mov selectedcol,ax
+    mov ax,row
+    mov selectedrow,ax
+    mov ax,pixelcol
+    mov selectedpixelcol,ax
+    mov ax,pixelrow
+    mov selectedpixelrow,ax
+
+    mov bx,row
+    mov ax,8
+    mul bx
+    mov bx,ax
+    mov si,col
+    mov al,board[bx][si]
+    mov selectedpiece,al
+
+    popa
+    ret
+selection endp
 
 getmove proc
     pusha

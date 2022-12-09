@@ -13,6 +13,9 @@ pixelcol dw 0
 selectedpos dw 0
 selectedcol dw 0
 selectedrow dw 0
+selectedpixelcol dw 0
+selectedpixelrow dw 0
+selectedpiece db 0
 highlightpos dw 0
 board db 8,9,10,11,12,10,9,8
       db 7,7,7,7,7,7,7,7
@@ -52,12 +55,9 @@ main proc far
         cmp al,'q'
         jne whiletrue
 
-        mov bx,row
-        mov ax,8
-        mul bx
-        mov bx,ax
-        mov si,col
-        cmp board[bx][si],1
+        call selection
+        
+        cmp selectedpiece,1
         je highpawn
 
         jmp whiletrue
