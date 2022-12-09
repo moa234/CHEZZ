@@ -32,9 +32,6 @@ main proc far
         call traversecell
     jmp whiletrue
 
-    
-
-    ReadString InDATA
 
     MOV AH, 4CH
     MOV AL, 01 ;your return code.

@@ -124,12 +124,7 @@ deleteborder proc
     
     mov di,currpos
 
-    mov cx,col
-    add cx,3
-    mov dx,row
-    add dx,3
-    mov ah,0dh
-    int 10h
+    GetPixelColour col,row
     ;mov al,[es:di]
 
     
