@@ -228,6 +228,144 @@ highlightpawn proc
     ret
 highlightpawn endp
 
+highlightRook proc
+    pusha
+
+    whilenopieceup:
+        cmp row,0
+        je piecefoundup@rook
+        mov bx,currpos
+        sub bx,320*25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        call checkpiece
+        cmp al,0
+        je highlightup@rook
+        cmp al,6
+        ja enemypiecefoundup@rook
+        jmp piecefoundup@rook
+        enemypiecefoundup@rook:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefoundup@rook
+        
+        highlightup@rook:
+        call highlightbox
+        
+
+        
+        jmp whilenopieceup
+        piecefoundup@rook:
+    
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+    
+    whilenopieceleft:
+        cmp col,0
+        je piecefoundleft@rook
+        mov bx,currpos
+        sub bx,25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        call checkpiece
+        cmp al,0
+        je highlightleft@rook
+        cmp al,6
+        ja enemypiecefoundleft@rook
+        jmp piecefoundleft@rook
+        enemypiecefoundleft@rook:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefoundleft@rook
+        
+        highlightleft@rook:
+        call highlightbox
+        
+
+        
+        jmp whilenopieceleft
+        piecefoundleft@rook:
+    
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+    
+    whilenopiecedown:
+        cmp row,7
+        je piecefounddown@rook
+        mov bx,currpos
+        add bx,320*25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        call checkpiece
+        cmp al,0
+        je highlightdown@rook
+        cmp al,6
+        ja enemypiecefounddown@rook
+        jmp piecefounddown@rook
+        enemypiecefounddown@rook:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefounddown@rook
+        
+        highlightdown@rook:
+        call highlightbox
+        
+
+        
+        jmp whilenopiecedown
+        piecefounddown@rook:
+    
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+    
+    whilenopieceright:
+        cmp col,7
+        je piecefoundright@rook
+        mov bx,currpos
+        add bx,25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        call checkpiece
+        cmp al,0
+        je highlightright@rook
+        cmp al,6
+        ja enemypiecefoundright@rook
+        jmp piecefoundright@rook
+        enemypiecefoundright@rook:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefoundright@rook
+        
+        highlightright@rook:
+        call highlightbox
+        
+
+        
+        jmp whilenopieceright
+        piecefoundright@rook:
+    
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+    popa
+    ret
+highlightRook endp
+
 checkboxcolor proc
     pusha
     mov ax,pixelcol
