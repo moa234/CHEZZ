@@ -1,0 +1,3 @@
+setusername MACRO name
+    
+ENDM

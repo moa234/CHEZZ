@@ -1,0 +1,32 @@
+1)clearscreen
+            — clear the screen in text mode
+
+2)GetKeyPress
+            — gets charachter from buffer
+            — doesn't wait for input
+
+3)TEXTMODE
+            — enter text mode
+            — page 0
+
+4)GraphicsMode
+            — enter graphics mode
+
+5)MOVECURSOR x, y
+            — moves cursor to x,y position
+
+6)ReadString str
+            — read a string and store it in a buffer
+
+7)DisplayString str
+            — displays string
+
+8)DisplayChar char
+            — display single charachter
+
+9)DisplayCharDX 
+            — Displays character stored in dx
+
+10)DisplayNumber
+            — displays a number stored in memory
+            — in decimal format
