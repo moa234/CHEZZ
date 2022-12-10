@@ -29,8 +29,8 @@ boxcolor db 0
 board db 8,9,10,11,12,10,9,8
       db 7,7,7,7,7,7,7,7
       db 0,0,0,0,0,0,0,0
-      db 0,0,6,0,0,0,0,0
-      db 0,0,0,0,0,0,0,0
+      db 0,0,4,0,0,0,0,0
+      db 0,0,0,0,0,0,4,0
       db 0,0,0,0,0,0,0,0
       db 1,1,1,1,1,1,1,1
       db 6,5,4,3,2,4,5,6
@@ -74,6 +74,8 @@ main proc far
         je highpawn
         cmp selectedpiece,6
         je highRook
+        cmp selectedpiece,4
+        je highbishop
 
         jmp whiletrue
         highpawn:
@@ -81,6 +83,8 @@ main proc far
         jmp whiletrue
         highRook:
         call highlightrook
+        highbishop:
+        call highlightbishop
 
     jmp whiletrue
 
