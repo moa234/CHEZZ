@@ -74,7 +74,25 @@ traversecell proc
     ret
 traversecell endp
 
-
+deleteselctedpiece proc
+pusha
+GetPixelColour selectedpixelcol, selectedpixelrow
+mov di,currpos;;;;;;;
+mov tempcurrpos,di;;;;;;
+mov di,selectedpos;;;;;;
+mov currpos,di;;;;;;
+cmp al,07h
+jne boxiswhite
+call drawboxgrey
+jmp drawisfinished
+boxiswhite:
+call drawboxwhite
+drawisfinished:
+mov di,tempcurrpos;;;;;
+mov currpos,di;;;;;;;
+popa
+ret
+deleteselctedpiece endp
 
 movefromcelltocell proc
     pusha
@@ -90,13 +108,16 @@ movefromcelltocell proc
     cmp board[bx][si],0   ;moving flag =0 and no piece in this square so do nothing
     je nomovingneeded
 
-    
-
     mov di,1
     mov movingopflag,di
     jmp nomovingneeded  ;we set moving flag as moving flag =0 and there is a piece in this square
 
+
     movingflagon:
+    ;call checkboxcolor
+    ;cmp boxcolor,0ah
+    ;jne nomovingneeded
+
     mov bx,row
     mov ax,8
     mul bx
@@ -121,8 +142,7 @@ movefromcelltocell proc
 
     mov dl,0
     mov board[bx][si],dl
-    ;delete pawn at  old position
-    
+    call deleteselctedpiece
 
     mov dx,0
     mov movingopflag,dx
@@ -148,7 +168,7 @@ highlightpawn proc
     je nopiece
     jmp pawnstart
     nopiece:
-        call highlightbox
+    call highlightbox
 
     cmp selectedrow,6
     jne pawnstart
@@ -181,8 +201,8 @@ highlightpawn proc
     ja enemypiece
     jmp endhighpawn
     enemypiece:
-        call highlightbox
-        call drawSelectedRedPiece
+    call highlightbox
+    call drawSelectedRedPiece
 
     mov ax,currpos
     sub ax,50
@@ -206,6 +226,20 @@ highlightpawn proc
     popa
     ret
 highlightpawn endp
+
+
+checkboxcolor proc
+pusha
+mov ax,pixelcol
+mov bx,pixelrow
+add ax, 2
+add bx, 2
+GetPixelColour ax,bx
+mov boxcolor,al
+popa
+checkboxcolor endp
+
+
 
 checkpiece proc
 

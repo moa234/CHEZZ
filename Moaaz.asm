@@ -21,10 +21,10 @@ selectedpiece db 0
 ;--------------------------------------------------
 highlightpos dw 0
 ;--------------------------------------------------
-oldcol dw 0
-oldrow dw 0
 movingopflag dw 0
-oldcurrpos dw 0
+tempcurrpos dw 0
+boxcolor db 0
+
 
 board db 8,9,10,11,12,10,9,8
       db 7,7,7,7,7,7,7,7
@@ -48,9 +48,6 @@ main proc far
     
     GraphicsMode
     
-
-
-    
     call initializegame
     whiletrue:
         getKeyPress
@@ -64,6 +61,13 @@ main proc far
         cmp al,'q'
         jne whiletrue
         call selection
+        
+        cmp movingopflag,1
+        jne pass
+        call checkboxcolor
+        cmp boxcolor,0ah
+        jne selectcell
+        pass:
         call movefromcelltocell
         
         cmp selectedpiece,1
