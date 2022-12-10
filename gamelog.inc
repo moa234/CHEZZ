@@ -75,23 +75,23 @@ traversecell proc
 traversecell endp
 
 deleteselctedpiece proc
-pusha
-GetPixelColour selectedpixelcol, selectedpixelrow
-mov di,currpos;;;;;;;
-mov tempcurrpos,di;;;;;;
-mov di,selectedpos;;;;;;
-mov currpos,di;;;;;;
-cmp al,07h
-jne boxiswhite
-call drawboxgrey
-jmp drawisfinished
-boxiswhite:
-call drawboxwhite
-drawisfinished:
-mov di,tempcurrpos;;;;;
-mov currpos,di;;;;;;;
-popa
-ret
+    pusha
+    GetPixelColour selectedpixelcol, selectedpixelrow
+    mov di,currpos;;;;;;;
+    mov tempcurrpos,di;;;;;;
+    mov di,selectedpos;;;;;;
+    mov currpos,di;;;;;;
+    cmp al,07h
+    jne boxiswhite
+    call drawboxgrey
+    jmp drawisfinished
+    boxiswhite:
+    call drawboxwhite
+    drawisfinished:
+    mov di,tempcurrpos;;;;;
+    mov currpos,di;;;;;;;
+    popa
+    ret
 deleteselctedpiece endp
 
 movefromcelltocell proc
@@ -199,11 +199,12 @@ highlightpawn proc
     call checkpiece
     cmp al,6
     ja enemypiece
-    jmp endhighpawn
+    jmp notrightpawn
     enemypiece:
     call highlightbox
     call drawSelectedRedPiece
-
+    
+    notrightpawn:
     mov ax,currpos
     sub ax,50
     mov currpos,ax
@@ -227,19 +228,16 @@ highlightpawn proc
     ret
 highlightpawn endp
 
-
 checkboxcolor proc
-pusha
-mov ax,pixelcol
-mov bx,pixelrow
-add ax, 2
-add bx, 2
-GetPixelColour ax,bx
-mov boxcolor,al
-popa
+    pusha
+    mov ax,pixelcol
+    mov bx,pixelrow
+    add ax, 2
+    add bx, 2
+    GetPixelColour ax,bx
+    mov boxcolor,al
+    popa
 checkboxcolor endp
-
-
 
 checkpiece proc
 
