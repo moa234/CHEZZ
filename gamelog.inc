@@ -27,6 +27,20 @@ updaterowandcol proc
     ret
 updaterowandcol endp
 
+delnewpos proc
+   pusha
+   GetPixelColour pixelcol, pixelrow
+   cmp al,07h
+   jne boxiswhitee
+   call drawboxgrey
+   jmp drawingfinished
+   boxiswhitee:
+   call drawboxwhite
+   drawingfinished:
+   popa
+   ret
+delnewpos endp
+
 traversecell proc
     pusha 
 
@@ -114,10 +128,6 @@ movefromcelltocell proc
 
 
     movingflagon:
-    ;call checkboxcolor
-    ;cmp boxcolor,0ah
-    ;jne nomovingneeded
-
     mov bx,row
     mov ax,8
     mul bx
@@ -132,6 +142,7 @@ movefromcelltocell proc
     movingneeded:
     mov al,selectedpiece
     mov board[bx][si],al
+    call delnewpos
     call drawSelectedBluePiece
 
     mov bx,selectedrow
@@ -152,6 +163,7 @@ movefromcelltocell proc
     popa
     ret
 movefromcelltocell endp
+
 
 highlightpawn proc
     pusha

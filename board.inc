@@ -162,6 +162,8 @@ deleteborder ENDP
 
 highlightbox proc
     pusha
+    mov bl,1
+    mov highlightflag,bl
     mov     ax,0A000h
     mov     es,ax
     

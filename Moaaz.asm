@@ -20,6 +20,7 @@ selectedpixelrow dw 0
 selectedpiece db 0
 ;--------------------------------------------------
 highlightpos dw 0
+highlightflag db 0
 ;--------------------------------------------------
 movingopflag dw 0
 tempcurrpos dw 0
@@ -50,6 +51,8 @@ main proc far
     
     call initializegame
     whiletrue:
+        mov bl,0
+        mov highlightflag,0
         getKeyPress
         jz whiletrue
         clearbuffer
@@ -80,15 +83,21 @@ main proc far
         jmp whiletrue
         highpawn:
         call highlightpawn
-        jmp whiletrue
+        jmp checkhighlight
         highRook:
         call highlightrook
-        jmp whiletrue
+        jmp checkhighlight
         highbishop:
         call highlightbishop
 
-    jmp whiletrue
+        checkhighlight:
+        cmp highlightflag,1
+        je whiletrue
+        mov bl,0
+        mov movingopflag,0
 
+    jmp whiletrue
+    
 
     MOV AH, 4CH
     MOV AL, 01 ;your return code.
