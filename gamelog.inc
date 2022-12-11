@@ -37,6 +37,7 @@ delnewpos proc
    boxiswhitee:
    call drawboxwhite
    drawingfinished:
+   call drawborder
    popa
    ret
 delnewpos endp
