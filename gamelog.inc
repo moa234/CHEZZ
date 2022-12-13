@@ -197,7 +197,7 @@ highlightpawn proc
     je nopiece2
     jmp pawnstart
     nopiece2:
-        call highlightbox
+    call highlightbox
     pawnstart:
     
     mov ax,selectedpos
@@ -229,8 +229,8 @@ highlightpawn proc
     ja enemypiece2
     jmp endhighpawn
     enemypiece2:
-        call highlightbox
-        call drawSelectedRedPiece
+    call highlightbox
+    call drawSelectedRedPiece
     endhighpawn:
 
     mov ax,selectedpos
@@ -524,6 +524,280 @@ highlightBishop proc
     popa
     ret
 highlightBishop endp
+
+
+highlightknight proc
+    pusha
+;check if bx[new currpos] outside the board skip highlighting
+       
+        mov bx,currpos
+        sub bx,320*25-25-25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedcol,5
+        ja piecefound2xy1@Knight
+        cmp selectedrow,0
+        je piecefound2xy1@Knight
+        call checkpiece
+        cmp al,0
+        je highlight2xy1@Knight
+
+        cmp al,6
+        ja enemypiecefound2xy1@Knight
+        jmp piecefound2xy1@Knight
+        
+        enemypiecefound2xy1@Knight:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefound2xy1@Knight
+        
+        highlight2xy1@Knight:
+        call highlightbox
+
+        piecefound2xy1@Knight:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+        
+
+
+        mov bx,currpos
+        sub bx,320*25+25+25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        cmp selectedrow,0
+        je piecefoundneg2xy@Knight
+        cmp selectedcol,2
+        jb piecefoundneg2xy@Knight
+        
+        call checkpiece
+        cmp al,0
+        je highlightneg2xy@Knight
+
+        cmp al,6
+        ja enemypiecefoundneg2xy@Knight
+        jmp piecefoundneg2xy@Knight
+        
+        enemypiecefoundneg2xy@Knight:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefoundneg2xy@Knight
+        
+        highlightneg2xy@Knight:
+        call highlightbox
+
+        piecefoundneg2xy@Knight:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+
+        
+        mov bx,currpos
+        add bx,320*25-25-25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedcol,2
+        jb piecefoundneg2xnegy@Knight
+        cmp selectedrow,7
+        je piecefoundneg2xnegy@Knight
+        call checkpiece
+        cmp al,0
+        je highlightneg2xnegy@Knight
+
+        cmp al,6
+        ja enemypiecefoundneg2xnegy@Knight
+        jmp piecefoundneg2xnegy@Knight
+        
+        enemypiecefoundneg2xnegy@Knight:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefoundneg2xnegy@Knight
+        
+        highlightneg2xnegy@Knight:
+        call highlightbox
+
+        piecefoundneg2xnegy@Knight:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+
+
+        mov bx,currpos
+        add bx,320*25+25+25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedcol,5
+        ja piecefound2xnegy@Knight
+        cmp selectedrow,7
+        je piecefound2xnegy@Knight
+        call checkpiece
+        cmp al,0
+        je highlight2xnegy@Knight
+
+        cmp al,6
+        ja enemypiecefound2xnegy@Knight
+        jmp piecefound2xnegy@Knight
+        
+        enemypiecefound2xnegy@Knight:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefound2xnegy@Knight
+        
+        highlight2xnegy@Knight:
+        call highlightbox
+
+        piecefound2xnegy@Knight:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+
+        
+        mov bx,currpos
+        sub bx,2*320*25+25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedcol,0
+        je piecefoundnegx2y@Knight
+        cmp selectedrow,2
+        jb piecefoundnegx2y@Knight
+        call checkpiece
+        cmp al,0
+        je highlightnegx2y@Knight
+
+        cmp al,6
+        ja enemypiecefoundnegx2y@Knight
+        jmp piecefoundnegx2y@Knight
+        
+        enemypiecefoundnegx2y@Knight:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefoundnegx2y@Knight
+        
+        highlightnegx2y@Knight:
+        call highlightbox
+
+        piecefoundnegx2y@Knight:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+
+
+        mov bx,currpos
+        sub bx,2*320*25-25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedcol,7
+        je piecefoundx2y@Knight
+        cmp selectedrow,2
+        jb piecefoundx2y@Knight
+        call checkpiece
+        cmp al,0
+        je highlightx2y@Knight
+
+        cmp al,6
+        ja enemypiecefoundx2y@Knight
+        jmp piecefoundx2y@Knight
+        
+        enemypiecefoundx2y@Knight:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefoundx2y@Knight
+        
+        highlightx2y@Knight:
+        call highlightbox
+
+        piecefoundx2y@Knight:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+        
+        
+        mov bx,currpos
+        add bx,2*320*25+25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedcol,7
+        je piecefoundxneg2y@Knight
+        cmp selectedrow,5
+        ja piecefoundxneg2y@Knight
+        call checkpiece
+        cmp al,0
+        je highlightxneg2y@Knight
+
+        cmp al,6
+        ja enemypiecefoundxneg2y@Knight
+        jmp piecefoundxneg2y@Knight
+        
+        enemypiecefoundxneg2y@Knight:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefoundxneg2y@Knight
+        
+        highlightxneg2y@Knight:
+        call highlightbox
+
+        piecefoundxneg2y@Knight:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+        
+
+        mov bx,currpos
+        add bx,2*320*25-25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedcol,0
+        je piecefoundnegxneg2y@Knight
+        cmp selectedrow,5
+        ja piecefoundnegxneg2y@Knight
+        call checkpiece
+        cmp al,0
+        je highlightnegxneg2y@Knight
+
+        cmp al,6
+        ja enemypiecefoundnegxneg2y@Knight
+        jmp piecefoundnegxneg2y@Knight
+        
+        enemypiecefoundnegxneg2y@Knight:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefoundnegxneg2y@Knight
+        
+        highlightnegxneg2y@Knight:
+        call highlightbox
+
+        piecefoundnegxneg2y@Knight:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+        
+       
+    popa
+    ret
+highlightKnight endp
 
 checkboxcolor proc
     pusha

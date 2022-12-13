@@ -34,7 +34,7 @@ board db 8,9,10,11,12,10,9,8
       db 0,0,0,0,0,0,0,0
       db 0,0,0,0,0,0,0,0
       db 1,1,1,1,1,1,1,1
-      db 6,5,4,3,2,4,5,6
+      db 6,5,4,2,3,4,5,6
      
 
 
@@ -79,8 +79,11 @@ main proc far
         je highRook
         cmp selectedpiece,4
         je highbishop
-
-        jmp whiletrue
+        cmp selectedpiece,5
+        je highknight
+        
+        ;jmp whiletrue
+        jmp checkhighlight
         highpawn:
         call highlightpawn
         jmp checkhighlight
@@ -89,6 +92,9 @@ main proc far
         jmp checkhighlight
         highbishop:
         call highlightbishop
+         jmp checkhighlight
+        highknight:
+        call highlightknight
 
         checkhighlight:
         cmp highlightflag,1
