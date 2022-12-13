@@ -143,6 +143,8 @@ movefromcelltocell proc
     movingneeded:
     mov al,selectedpiece
     mov board[bx][si],al
+    mov dl,01h
+    mov bordercolor,dl
     call delnewposhighlight
     call drawSelectedBluePiece
 
@@ -235,30 +237,30 @@ deletehighlight proc
     rows22:
         mov cx,4
         row123:
-            call checkboxcolor
-            cmp boxcolor,0ah
-            jne noneedtodeletegreen
-            call drawboxwhite
-            ;call checkpiece
-            ;cmp al,0
-            ;je noneedtodeletegreen
-            ;call drawSelectedRedPiece
-            noneedtodeletegreen:
-            add currpos,25
-            call updaterowandcol
+             call checkboxcolor
+             cmp boxcolor,0ah
+             jne noneedtodeletegreen
+             call drawboxwhite
+             ;call checkpiece
+             ;cmp al,0
+             ;je noneedtodeletegreen
+             ;call drawSelectedRedPiece
+             noneedtodeletegreen:
+             add currpos,25
+             call updaterowandcol
 
 
-            call checkboxcolor
-            cmp boxcolor,0ah
-            jne noneedtodeletegreen2
-            call drawboxgrey
-           ; call checkpiece
-           ; cmp al,0
-           ; je noneedtodeletegreen2
-           ; call drawSelectedRedPiece
-            noneedtodeletegreen2:
-            add currpos,25
-            call updaterowandcol
+             call checkboxcolor
+             cmp boxcolor,0ah
+             jne noneedtodeletegreen2
+             call drawboxgrey
+             ;call checkpiece
+             ;cmp al,0
+             ;je noneedtodeletegreen2
+             ;call drawSelectedRedPiece
+             noneedtodeletegreen2:
+             add currpos,25
+             call updaterowandcol
             
         loop row123
 
@@ -270,10 +272,10 @@ deletehighlight proc
             cmp boxcolor,0ah
             jne noneedtodeletegreen3
             call drawboxgrey
-           ; call checkpiece
-           ; cmp al,0
-           ; je noneedtodeletegreen3
-           ; call drawSelectedRedPiece
+            ;call checkpiece
+            ;cmp al,0
+            ;je noneedtodeletegreen3
+            ;call drawSelectedRedPiece
             noneedtodeletegreen3:
             add currpos,25
             call updaterowandcol
@@ -282,10 +284,10 @@ deletehighlight proc
             cmp boxcolor,0ah
             jne noneedtodeletegreen4
             call drawboxwhite
-           ; call checkpiece
-           ; cmp al,0
-           ; je noneedtodeletegreen4
-           ; call drawSelectedRedPiece
+            ;call checkpiece
+            ;cmp al,0
+            ;je noneedtodeletegreen4
+            ;call drawSelectedRedPiece
             noneedtodeletegreen4:
             add currpos,25
             call updaterowandcol
