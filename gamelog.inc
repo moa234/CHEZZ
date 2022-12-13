@@ -526,9 +526,280 @@ highlightBishop proc
 highlightBishop endp
 
 
+highlightKing proc
+    pusha
+    
+        mov bx,currpos
+        sub bx,320*25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedrow,0
+        je piecefound1@king
+        call checkpiece
+        cmp al,0
+        je highlight1@king
+
+        cmp al,6
+        ja enemypiecefound1@king
+        jmp piecefound1@king
+        
+        enemypiecefound1@king:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefound1@king
+        
+        highlight1@king:
+        call highlightbox
+
+        piecefound1@king:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+
+        
+
+        mov bx,currpos
+        add bx,320*25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedrow,7
+        je piecefound2@king
+        call checkpiece
+        cmp al,0
+        je highlight2@king
+
+        cmp al,6
+        ja enemypiecefound2@king
+        jmp piecefound2@king
+        
+        enemypiecefound2@king:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefound2@king
+        
+        highlight2@king:
+        call highlightbox
+
+        piecefound2@king:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+
+
+
+        mov bx,currpos
+        sub bx,320*25+25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedrow,0
+        je piecefound3@king
+        cmp selectedcol,0
+        je piecefound3@king
+        call checkpiece
+        cmp al,0
+        je highlight3@king
+
+        cmp al,6
+        ja enemypiecefound3@king
+        jmp piecefound3@king
+        
+        enemypiecefound3@king:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefound3@king
+        
+        highlight3@king:
+        call highlightbox
+
+        piecefound3@king:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+
+
+
+        mov bx,currpos
+        sub bx,320*25-25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedrow,0
+        je piecefound4@king
+        cmp selectedcol,7
+        je piecefound4@king
+        call checkpiece
+        cmp al,0
+        je highlight4@king
+
+        cmp al,6
+        ja enemypiecefound4@king
+        jmp piecefound4@king
+        
+        enemypiecefound4@king:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefound4@king
+        
+        highlight4@king:
+        call highlightbox
+
+        piecefound4@king:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+
+
+
+        mov bx,currpos
+        add bx,320*25-25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedrow,7
+        je piecefound5@king
+        cmp selectedcol,0
+        je piecefound5@king
+        call checkpiece
+        cmp al,0
+        je highlight5@king
+
+        cmp al,6
+        ja enemypiecefound5@king
+        jmp piecefound5@king
+        
+        enemypiecefound5@king:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefound5@king
+        
+        highlight5@king:
+        call highlightbox
+
+        piecefound5@king:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+
+
+
+        
+        mov bx,currpos
+        add bx,320*25+25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedrow,7
+        je piecefound6@king
+        cmp selectedcol,7
+        je piecefound6@king
+        call checkpiece
+        cmp al,0
+        je highlight6@king
+
+        cmp al,6
+        ja enemypiecefound6@king
+        jmp piecefound6@king
+        
+        enemypiecefound6@king:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefound6@king
+        
+        highlight6@king:
+        call highlightbox
+
+        piecefound6@king:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+
+
+        mov bx,currpos
+        add bx,25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedcol,7
+        je piecefound7@king
+        call checkpiece
+        cmp al,0
+        je highlight7@king
+
+        cmp al,6
+        ja enemypiecefound7@king
+        jmp piecefound7@king
+        
+        enemypiecefound7@king:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefound7@king
+        
+        highlight7@king:
+        call highlightbox
+
+        piecefound7@king:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+
+
+
+
+        mov bx,currpos
+        sub bx,25
+        mov highlightpos,bx
+        mov currpos,bx
+        call updaterowandcol
+        
+        cmp selectedcol,0
+        je piecefound8@king
+        call checkpiece
+        cmp al,0
+        je highlight8@king
+        cmp al,6
+        ja enemypiecefound8@king
+        jmp piecefound8@king
+        
+        enemypiecefound8@king:
+        call highlightbox
+        call drawSelectedRedPiece
+        jmp piecefound8@king
+        
+        highlight8@king:
+        call highlightbox
+
+        piecefound8@king:
+
+        mov ax,selectedpos
+        mov currpos,ax
+        call updaterowandcol
+
+
+
+    popa
+    ret
+highlightKing endp
+
+
 highlightknight proc
     pusha
-;check if bx[new currpos] outside the board skip highlighting
        
         mov bx,currpos
         sub bx,320*25-25-25

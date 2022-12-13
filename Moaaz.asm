@@ -81,6 +81,8 @@ main proc far
         je highbishop
         cmp selectedpiece,5
         je highknight
+        cmp selectedpiece,3
+        je highking
         
         ;jmp whiletrue
         jmp checkhighlight
@@ -92,9 +94,13 @@ main proc far
         jmp checkhighlight
         highbishop:
         call highlightbishop
-         jmp checkhighlight
+        jmp checkhighlight
         highknight:
         call highlightknight
+        jmp checkhighlight
+        highking:
+        call highlightKing
+        
 
         checkhighlight:
         cmp highlightflag,1
