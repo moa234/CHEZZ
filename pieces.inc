@@ -2,38 +2,74 @@
 
 drawSelectedRedPiece proc
     cmp al,7
-    je redpawn
+    je Redpawn
     cmp al,8
-    je redrook
+    je Redrook
     cmp al,9
-    je redknight
+    je Redknight
     cmp al,10
-    je redbishop
+    je Redbishop
     cmp al,11
-    je redqueen
+    je Redqueen
     cmp al,12
-    je redking
+    je Redking
 
-    redpawn:
+    Redpawn:
         call DrawPawnRed
         ret
-    redrook:
+    Redrook:
         call DrawRookRed
         ret
-    redknight:
+    Redknight:
         call DrawKnightRed
         ret
-    redbishop:
+    Redbishop:
         call DrawBishopRed
         ret
-    redqueen:
+    Redqueen:
         call DrawQueenRed
         ret
-    redking:    
+    Redking:    
         call DrawKingRed
 
     ret
 drawSelectedRedPiece endp
+
+drawSelectedBluePiece proc
+    cmp al,1
+    je bluepawn
+    cmp al,6
+    je bluerook
+    cmp al,5
+    je blueknight
+    cmp al,4
+    je bluebishop
+    cmp al,2
+    je bluequeen
+    cmp al,3
+    je blueking
+
+    bluepawn:
+        call DrawPawnBlue
+        ret
+    bluerook:
+        call DrawRookBlue
+        ret
+    blueknight:
+        call DrawKnightBlue
+        ret
+    bluebishop:
+        call DrawBishopBlue
+        ret
+    bluequeen:
+        call DrawQueenBlue
+        ret
+    blueking:    
+        call DrawKingBlue
+
+    ret
+drawSelectedBluePiece endp
+
 
 DrawRookBlue PROC
     pusha

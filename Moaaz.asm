@@ -20,11 +20,13 @@ selectedpixelrow dw 0
 selectedpiece db 0
 ;--------------------------------------------------
 highlightpos dw 0
+highlightflag db 0
 ;--------------------------------------------------
-oldcol dw 0
-oldrow dw 0
 movingopflag dw 0
-oldcurrpos dw 0
+tempcurrpos dw 0
+boxcolor db 0
+bordercolor db 01h
+
 
 board db 8,9,10,11,12,10,9,8
       db 7,7,7,7,7,7,7,7
@@ -33,7 +35,7 @@ board db 8,9,10,11,12,10,9,8
       db 0,0,0,0,0,0,0,0
       db 0,0,0,0,0,0,0,0
       db 1,1,1,1,1,1,1,1
-      db 6,5,4,3,2,4,5,6
+      db 6,5,4,2,3,4,5,6
      
 
 
@@ -48,33 +50,47 @@ main proc far
     
     GraphicsMode
     
-
-
-    
     call initializegame
     whiletrue:
+        cmp highlightflag,1
+        jne donotchange
+        cmp movingopflag,0
+        jne donotchange 
+        call deletehighlight
+        donotchange:
+
         getKeyPress
         jz whiletrue
         clearbuffer
         cmp al,'q'
         je selectcell
         call traversecell
+        jmp selectcell
 
+        getout:
+        mov di,0
+        mov movingopflag,di
+        call deletehighlight
+        mov dl,01h
+        mov bordercolor,dl
+        call drawborder
         selectcell:
         cmp al,'q'
-        jne whiletrue
+        jne whiletrue 
         call selection
-        call movefromcelltocell
         
-        cmp selectedpiece,1
-        je highpawn
+        cmp movingopflag,1
+        jne pass
+        call checkboxcolor
+        cmp boxcolor,0ah
+        jne getout
+        pass:
+        call movefromcelltocell
+        call highlightforselectedpiece
 
-        jmp whiletrue
-        highpawn:
-        call highlightpawn
 
     jmp whiletrue
-
+    
 
     MOV AH, 4CH
     MOV AL, 01 ;your return code.

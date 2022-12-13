@@ -27,9 +27,9 @@ initializepieces proc
     add currpos,25
     call DrawBishopRed
     add currpos,25
-    call DrawKingRed
-    add currpos,25
     call DrawQueenRed
+    add currpos,25
+    call DrawKingRed
     add currpos,25
     call DrawBishopRed
     add currpos,25
@@ -57,9 +57,9 @@ initializepieces proc
     add currpos,25
     call DrawBishopBlue
     add currpos,25
-    call DrawKingBlue
-    add currpos,25
     call DrawQueenBlue
+    add currpos,25
+    call DrawKingBlue
     add currpos,25
     call DrawBishopBlue
     add currpos,25
