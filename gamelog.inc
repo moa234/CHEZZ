@@ -349,6 +349,8 @@ highlightpawn proc
     sub ax,320*25-25
     mov currpos,ax
     call updaterowandcol
+    cmp col,7
+    ja notrightpawn
     mov highlightpos,ax
 
     call checkpiece
@@ -364,6 +366,8 @@ highlightpawn proc
     sub ax,50
     mov currpos,ax
     call updaterowandcol
+    cmp col,7
+    ja endhighpawn
     mov highlightpos,ax
 
     call checkpiece
