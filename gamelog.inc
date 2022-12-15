@@ -179,42 +179,51 @@ highlightforselectedpiece proc
     je highknight
     cmp selectedpiece,3
     je highking
+    cmp selectedpiece,2
+    je highqueen
         
     jmp checkhighlight
     highpawn:
-    mov dl, 04h
-    mov bordercolor,dl
-    call drawborder
-    mov bordercolor,dl
-    call highlightpawn
-    jmp checkhighlight
+        mov dl, 04h
+        mov bordercolor,dl
+        call drawborder
+        mov bordercolor,dl
+        call highlightpawn
+        jmp checkhighlight
     highRook:
-    mov dl, 04h
-    mov bordercolor,dl
-    call drawborder
-    mov bordercolor,dl
-    call highlightrook
-    jmp checkhighlight
+        mov dl, 04h
+        mov bordercolor,dl
+        call drawborder
+        mov bordercolor,dl
+        call highlightrook
+        jmp checkhighlight
     highbishop:
-    mov dl, 04h
-    mov bordercolor,dl
-    call drawborder
-    mov bordercolor,dl
-    call highlightbishop
-    jmp checkhighlight
+        mov dl, 04h
+        mov bordercolor,dl
+        call drawborder
+        mov bordercolor,dl
+        call highlightbishop
+        jmp checkhighlight
     highknight:
-    mov dl, 04h
-    mov bordercolor,dl
-    call drawborder
-    mov bordercolor,dl
-    call highlightknight
-    jmp checkhighlight
+        mov dl, 04h
+        mov bordercolor,dl
+        call drawborder
+        mov bordercolor,dl
+        call highlightknight
+        jmp checkhighlight
     highking:
-    mov dl, 04h
-    mov bordercolor,dl
-    call drawborder
-    mov bordercolor,dl
-    call highlightKing
+        mov dl, 04h
+        mov bordercolor,dl
+        call drawborder
+        mov bordercolor,dl
+        call highlightKing
+        jmp checkhighlight
+    highqueen:
+        mov dl, 04h
+        mov bordercolor,dl
+        call drawborder
+        mov bordercolor,dl
+        call highlightqueen
         
     checkhighlight:
     cmp highlightflag,1
@@ -1215,6 +1224,15 @@ highlightknight proc
     popa
     ret
 highlightKnight endp
+
+highlightqueen proc
+    pusha
+
+    call highlightrook
+    call highlightbishop
+
+    popa
+highlightqueen endp
 
 checkboxcolor proc
     pusha
