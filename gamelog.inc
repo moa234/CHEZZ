@@ -143,6 +143,8 @@ movefromcelltocell proc
     movingneeded:
     mov al,selectedpiece
     mov board[bx][si],al
+    mov dl,01h
+    mov bordercolor,dl
     call delnewposhighlight
     call drawSelectedBluePiece
 
