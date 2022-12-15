@@ -12,6 +12,8 @@ initializegame proc
     call initializepieces
     mov currpos,320*25*3+25*3
     call drawborder
+    getsystemtime
+    mov starttime, cx
 
     ret
 initializegame ENDP

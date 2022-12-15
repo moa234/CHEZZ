@@ -68,6 +68,12 @@ clearbuffer MACRO
 endm clearbuffer
 ;============================================================================================
 
+;==============================Getsystemtime================================================
+getsystemtime macro
+    mov ah,2ch
+    int 21h
+endm getsystemtime
+
 ;===============================ENTERTEXTMODE===============================================
 TEXTMODE MACRO 
     pusha

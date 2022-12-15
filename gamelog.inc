@@ -1,4 +1,13 @@
 .code
+updatetime proc
+    pusha
+    mov ah,2ch
+    int 21h
+    sub cx,starttime
+    mov currtime,cx
+    popa
+    ret
+updatetime endp
 
 updaterowandcol proc
     pusha

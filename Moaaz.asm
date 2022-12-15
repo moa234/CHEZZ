@@ -37,10 +37,13 @@ board db 8,9,10,11,12,10,9,8
       db 1,1,1,1,1,1,1,1
       db 6,5,4,2,3,4,5,6
      
+timerboard db 8*8 dup(0)
 
+starttime dw 0
+currtime dw 0
 
 include macros.inc
-include gameui.inc;comment from aley
+include gameui.inc
 include gamelog.inc
 .code
 main proc far
@@ -52,6 +55,8 @@ main proc far
     
     call initializegame
     whiletrue:
+        call updatetime
+
         cmp highlightflag,1
         jne donotchange
         cmp movingopflag,0
