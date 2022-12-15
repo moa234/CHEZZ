@@ -239,10 +239,10 @@ deletehighlight proc
             cmp boxcolor,0ah
             jne noneedtodeletegreen
             call drawboxwhite
-            ;call checkpiece
-            ;cmp al,0
-            ;je noneedtodeletegreen
-            ;call drawSelectedRedPiece
+            call checkpiece
+            cmp al,0
+            je noneedtodeletegreen
+            call drawSelectedRedPiece
             noneedtodeletegreen:
             add currpos,25
             call updaterowandcol
@@ -252,10 +252,10 @@ deletehighlight proc
             cmp boxcolor,0ah
             jne noneedtodeletegreen2
             call drawboxgrey
-           ; call checkpiece
-           ; cmp al,0
-           ; je noneedtodeletegreen2
-           ; call drawSelectedRedPiece
+            call checkpiece
+            cmp al,0
+            je noneedtodeletegreen2
+            call drawSelectedRedPiece
             noneedtodeletegreen2:
             add currpos,25
             call updaterowandcol
@@ -270,10 +270,10 @@ deletehighlight proc
             cmp boxcolor,0ah
             jne noneedtodeletegreen3
             call drawboxgrey
-           ; call checkpiece
-           ; cmp al,0
-           ; je noneedtodeletegreen3
-           ; call drawSelectedRedPiece
+            call checkpiece
+            cmp al,0
+            je noneedtodeletegreen3
+            call drawSelectedRedPiece
             noneedtodeletegreen3:
             add currpos,25
             call updaterowandcol
@@ -282,10 +282,10 @@ deletehighlight proc
             cmp boxcolor,0ah
             jne noneedtodeletegreen4
             call drawboxwhite
-           ; call checkpiece
-           ; cmp al,0
-           ; je noneedtodeletegreen4
-           ; call drawSelectedRedPiece
+            call checkpiece
+            cmp al,0
+            je noneedtodeletegreen4
+            call drawSelectedRedPiece
             noneedtodeletegreen4:
             add currpos,25
             call updaterowandcol
@@ -294,7 +294,9 @@ deletehighlight proc
         add currpos,320*25-25*8
         call updaterowandcol
         cmp currpos,320*25*8
-    jnz rows22
+    jz notrows22
+    jmp rows22
+    notrows22:
 
     mov di,tempcurrpos
     mov currpos,di
