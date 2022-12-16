@@ -1,13 +1,86 @@
 .code
+Displaytime proc   
+    ;displays the number saved in memory variable x max size : 65535
+    pusha
+    mov ah,0
+    mov al,currsec
+	mov cx,0
+    mov dx,0
+    label1:
+        ;exit when number reaches 0
+        cmp ax,0
+        je print1     
+        
+        ;get unit digit
+        mov bx,10       
+        div bx     
+
+        push dx
+        inc cx
+
+        ;set dx to 0
+        mov dx,0
+        jmp label1
+    print1:
+        ;check if count
+        ;is greater than zero
+        cmp cx,0
+        je exit
+         
+        pop dx 
+        add dx,'0'
+        DisplayCharDX
+         
+        dec cx
+        jmp print1
+    exit:
+    popa
+    ret
+Displaytime endp
+
 updatetime proc
     pusha
     mov ah,2ch
     int 21h
-    sub cx,starttime
-    mov currtime,cx
+    cmp dh, startsec
+    jb currakbar
+
+    sub dh,startsec
+    mov currsec,dh
+    sub cl,startmin
+    mov currmin,cl
+    jmp endtime
+    currakbar: 
+    mov dl,startsec
+    add dl,dh
+    mov currsec,dl
+    sub cl,startmin
+    mov currmin,cl
+    
+
+    endtime:
     popa
     ret
 updatetime endp
+
+updatepiecestime proc
+    pusha
+    mov bx,row
+    mov ax,16
+    mul bx
+    mov bx,ax
+    mov si,col
+    mov ax,2
+    mul si
+    mov si,ax
+
+    mov al,currsec
+    mov ah,currmin
+    mov timerboard[bx][si],ax
+
+    popa
+    ret
+updatepiecestime endp
 
 updaterowandcol proc
     pusha
@@ -132,6 +205,10 @@ movefromcelltocell proc
     cmp board[bx][si],0   ;moving flag =0 and no piece in this square so do nothing
     je nomovingneeded
 
+    call checktimeofpiece
+    cmp selectflag,0
+    je nomovingneeded
+
     mov di,1
     mov movingopflag,di
     jmp nomovingneeded  ;we set moving flag as moving flag =0 and there is a piece in this square
@@ -171,13 +248,45 @@ movefromcelltocell proc
     mov movingopflag,dx
     mov selectedpiece,dl
 
+    call updatepiecestime
+
     nomovingneeded:
     popa
     ret
 movefromcelltocell endp
 
+checktimeofpiece proc
+
+    mov bx,row
+    mov ax,16
+    mul bx
+    mov bx,ax
+    mov si,col
+    mov ax,2
+    mul si
+    mov si,ax
+
+    mov bx, timerboard[bx][si]
+    add bx,3
+    cmp bh,currmin
+    jne canmove
+    cmp currsec,bl
+    jae canmove
+    jmp cantmove
+    canmove:
+        mov selectflag,1
+        jmp endselectmove
+    cantmove:
+        mov selectflag,0
+    endselectmove:
+    ret
+checktimeofpiece endp
 
 highlightforselectedpiece proc
+    cmp selectflag,0
+    jne selecthighlight
+    jmp checkhighlight
+    selecthighlight:
     cmp selectedpiece,1
     je highpawn
     cmp selectedpiece,6

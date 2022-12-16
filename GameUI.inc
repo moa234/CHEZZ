@@ -13,7 +13,14 @@ initializegame proc
     mov currpos,320*25*3+25*3
     call drawborder
     getsystemtime
-    mov starttime, cx
+    mov startmin, cl
+    mov startsec, dh 
+
+    mov cx,8*8*2
+    mov dl,startsec
+    mov dh,startmin
+
+    
 
     ret
 initializegame ENDP

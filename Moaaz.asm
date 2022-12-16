@@ -23,6 +23,7 @@ highlightpos dw 0
 highlightflag db 0
 ;--------------------------------------------------
 movingopflag dw 0
+selectflag db 1
 tempcurrpos dw 0
 boxcolor db 0
 bordercolor db 01h
@@ -37,10 +38,12 @@ board db 8,9,10,11,12,10,9,8
       db 1,1,1,1,1,1,1,1
       db 6,5,4,2,3,4,5,6
      
-timerboard db 8*8 dup(0)
+timerboard dw 8*8 dup(-3)
 
-starttime dw 0
-currtime dw 0
+startsec db 0
+startmin db 0
+currsec db 0
+currmin db 0
 
 include macros.inc
 include gameui.inc
@@ -56,9 +59,13 @@ main proc far
     call initializegame
     whiletrue:
         call updatetime
-
+        MOVECURSOR 25,1
+        call Displaytime
+        
+        mov selectflag,1
         cmp highlightflag,1
         jne donotchange
+        
         cmp movingopflag,0
         jne donotchange 
         call deletehighlight
@@ -73,8 +80,7 @@ main proc far
         jmp selectcell
 
         getout:
-        mov di,0
-        mov movingopflag,di
+        mov movingopflag,0
         call deletehighlight
         mov dl,01h
         mov bordercolor,dl
@@ -82,6 +88,7 @@ main proc far
         selectcell:
         cmp al,'q'
         jne whiletrue 
+
         call selection
         
         cmp movingopflag,1
@@ -90,6 +97,7 @@ main proc far
         cmp boxcolor,0ah
         jne getout
         pass:
+        
         call movefromcelltocell
         call highlightforselectedpiece
 
