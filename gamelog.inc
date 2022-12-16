@@ -220,6 +220,11 @@ movefromcelltocell proc
     mul bx
     mov bx,ax  ;bx store row*8
     mov si,col ;SI store  col
+    cmp board[bx][si],12
+    jne redkingnotdead
+    mov al,1
+    mov redkingdead,al
+    redkingnotdead:
     cmp board[bx][si],6
     ja movingneeded
     cmp board[bx][si],0

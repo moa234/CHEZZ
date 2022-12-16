@@ -6,6 +6,15 @@ mes db 'This is message','$'
 InDATA db 6,?,6 dup('$')
 Innum db 5,?,4 dup('$')
 ;--------------------------------------------------
+MSG1 db "To start chatting press F1 $"
+MSG2 db "To start the game press F2 $" 
+MSG3 db "To end the program press ESC $"     
+NotifLine db   "________________________________________________________________________________$"
+F1notif db "You sent a chat invitation to Ahmed $"
+F2notif db "You sent a game invitation to Ahmed $"
+chatinviteflag db 0
+gameinviteflag db 0
+;--------------------------------------------------
 currpos dw 0
 row dw 0
 col dw 0
@@ -18,6 +27,7 @@ selectedrow dw 0
 selectedpixelcol dw 0
 selectedpixelrow dw 0
 selectedpiece db 0
+redkingdead db 0
 ;--------------------------------------------------
 highlightpos dw 0
 highlightflag db 0
@@ -45,6 +55,7 @@ startmin db 0
 currsec db 0
 currmin db 0
 
+include menu.inc
 include macros.inc
 include gameui.inc
 include gamelog.inc
@@ -58,6 +69,10 @@ main proc far
     
     call initializegame
     whiletrue:
+        cmp redkingdead,1
+        jne notendgame
+        jmp endgame
+        notendgame:
         call updatetime
         MOVECURSOR 25,1
         call Displaytime
@@ -70,10 +85,12 @@ main proc far
         jne donotchange 
         call deletehighlight
         donotchange:
-
+      
         getKeyPress
         jz whiletrue
         clearbuffer
+        cmp ah,3eh
+        je endgame
         cmp al,'q'
         je selectcell
         call traversecell
@@ -104,6 +121,8 @@ main proc far
 
     jmp whiletrue
     
+    endgame:
+    call menu
 
     MOV AH, 4CH
     MOV AL, 01 ;your return code.

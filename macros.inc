@@ -112,6 +112,12 @@ GETCURSORPOSINCHAT MACRO
 	MOV BH,2
 	INT 10H
 ENDM GETCURSORPOSINCHAT
+
+GETCURSOR MACRO 
+    mov ah,3h 
+    mov bh,0h 
+    int 10h    
+ENDM
 ;============================================================================================
 
 ;================================MOVECURSORPOSITION=========================================
