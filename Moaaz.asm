@@ -74,7 +74,6 @@ main proc far
         jmp endgame
         notendgame:
         call updatetime
-        MOVECURSOR 25,1
         call Displaytime
         
         mov selectflag,1
@@ -87,7 +86,9 @@ main proc far
         donotchange:
       
         getKeyPress
-        jz whiletrue
+        jnz whilefalse
+        jmp whiletrue
+        whilefalse:
         clearbuffer
         cmp ah,3eh
         je endgame
@@ -104,7 +105,9 @@ main proc far
         call drawborder
         selectcell:
         cmp al,'q'
-        jne whiletrue 
+        je whileq
+        jmp whiletrue
+        whileq: 
 
         call selection
         

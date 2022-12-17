@@ -1,39 +1,14 @@
 .code
 Displaytime proc   
-    ;displays the number saved in memory variable x max size : 65535
     pusha
-    mov ah,0
-    mov al,currsec
-	mov cx,0
-    mov dx,0
-    label1:
-        ;exit when number reaches 0
-        cmp ax,0
-        je print1     
-        
-        ;get unit digit
-        mov bx,10       
-        div bx     
-
-        push dx
-        inc cx
-
-        ;set dx to 0
-        mov dx,0
-        jmp label1
-    print1:
-        ;check if count
-        ;is greater than zero
-        cmp cx,0
-        je exit
-         
-        pop dx 
-        add dx,'0'
-        DisplayCharDX
-         
-        dec cx
-        jmp print1
-    exit:
+    cmp currsec,0
+    jne notzero
+    clearscreentimer
+    notzero:
+    MOVECURSOR 40-5,1
+    DisplayNumber currmin
+    DisplayChar ':'
+    DisplayNumber currsec
     popa
     ret
 Displaytime endp
@@ -43,14 +18,21 @@ updatetime proc
 
     getsystemtime
     cmp dh, startsec
-    jb currakbar
+    jb currsecakbar
 
-    curras8ar:
+    cmp cl, startmin
+    jb currminakbar
+    jmp incmin
+    
+    currminakbar:
+    add cl,60
+    
+    incmin:
     sub cl,startmin
     mov currmin,cl
     jmp incsec
 
-    currakbar:
+    currsecakbar:
     add dh,60
 
     incsec:

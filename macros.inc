@@ -10,6 +10,18 @@ clearscreen MACRO
 ENDM clearscreen
 ;============================================================================================
 
+;====================CLEARSCREENat=============================================================
+clearscreentimer MACRO
+    pusha
+    mov ax,0700h
+    mov bh,00
+    mov cx,0126h
+    mov dx,0128H
+    int 10h
+    popa
+ENDM clearscreen
+;============================================================================================
+
 ;====================scrollup=============================================================
 scrollup MACRO from,to
     pusha
@@ -177,11 +189,20 @@ ENDM PrintChar
 
 ;=====================================DisplayNumber==========================================
 DisplayNumber macro number    
+local label1
+local print1
+local exit
 ;displays the number saved in memory variable x max size : 65535
     pusha
-    mov ax,number
+    mov al,number
+    mov ah,0
 	mov cx,0
     mov dx,0
+    cmp ax,0
+    jne label1
+    mov dx,'0'
+    DisplayCharDX
+    jmp exit
     label1:
         ;exit when number reaches 0
         cmp ax,0
