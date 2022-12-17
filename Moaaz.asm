@@ -28,8 +28,8 @@ selectedpixelcol dw 0
 selectedpixelrow dw 0
 selectedpiece db 0
 redkingdead db 0
+waitingtime dw 4
 powerupflag db 0
-waitingtime dw 3
 ;--------------------------------------------------
 highlightpos dw 0
 highlightflag db 0
@@ -73,13 +73,16 @@ main proc far
     whiletrue:
         cmp currmin,0
         je gotosec
-        cmp currmin,4
-        je gotosec
-        jne noneedtogeneratepowerup
+        jmp noneedtogeneratepowerup
         gotosec:
-        cmp currsec,30
+        cmp currsec,10
+        je gotopowerflag
+        jmp noneedtogeneratepowerup
+        gotopowerflag:
+        cmp powerupflag,0
         jne noneedtogeneratepowerup
-        needtogeneratepowerup:
+        mov cl,1
+        mov powerupflag,cl
         call GeneratePowerUp
         noneedtogeneratepowerup:
         cmp redkingdead,1

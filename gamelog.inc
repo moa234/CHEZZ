@@ -51,8 +51,8 @@ checkifemptybox:
    mov bx,ax
    cmp board[bx][si],0   ;here we must check that the random generated position on the board is empty to add the powerup at this position
    jne checkifemptybox
-   ;mov bx,38;;;;;;;;;;remove
-   ;mov si,2;;;;;;;;;;remove
+   mov bx,38;;;;;;;;;;remove
+   mov si,3;;;;;;;;;;remove
    mov board[bx][si], 44  ;we are going to define that powerupvalue is = 44, to recognize its place on the board
 
 popa
@@ -249,7 +249,7 @@ movefromcelltocell proc
     mov si,col                ;SI store  col
     cmp board[bx][si], 44     ;here we check that if the destination box conatain a powerup or not
     jne nopowerup
-    mov ax,2                  ;remove edit 1 to 2
+    mov ax,1                  ;remove edit 1 to 2
     mov waitingtime,ax
     nopowerup:
     cmp board[bx][si], 12
@@ -522,6 +522,8 @@ highlightpawn proc
     mov highlightpos,ax
 
     call checkpiece
+    cmp al,44
+    je notrightpawn
     cmp al,6
     ja enemypiece
     jmp notrightpawn
@@ -539,6 +541,8 @@ highlightpawn proc
     mov highlightpos,ax
 
     call checkpiece
+    cmp al,44
+    je endhighpawn
     cmp al,6
     ja enemypiece2
     jmp endhighpawn

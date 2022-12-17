@@ -13,6 +13,7 @@ drawSelectedRedPiece proc
     je Redqueen
     cmp al,12
     je Redking
+    ret
 
     Redpawn:
         call DrawPawnRed
@@ -31,6 +32,7 @@ drawSelectedRedPiece proc
         ret
     Redking:    
         call DrawKingRed
+  
 
     ret
 drawSelectedRedPiece endp
@@ -48,7 +50,8 @@ drawSelectedBluePiece proc
     je bluequeen
     cmp al,3
     je blueking
-
+    ret
+    
     bluepawn:
         call DrawPawnBlue
         ret
