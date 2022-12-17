@@ -40,25 +40,23 @@ Displaytime endp
 
 updatetime proc
     pusha
-    mov ah,2ch
-    int 21h
+
+    getsystemtime
     cmp dh, startsec
     jb currakbar
 
+    curras8ar:
+    sub cl,startmin
+    mov currmin,cl
+    jmp incsec
+
+    currakbar:
+    add dh,60
+
+    incsec:
     sub dh,startsec
     mov currsec,dh
-    sub cl,startmin
-    mov currmin,cl
-    jmp endtime
-    currakbar: 
-    mov dl,startsec
-    add dl,dh
-    mov currsec,dl
-    sub cl,startmin
-    mov currmin,cl
-    
 
-    endtime:
     popa
     ret
 updatetime endp
