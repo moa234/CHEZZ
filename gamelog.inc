@@ -1,11 +1,7 @@
 .code
 Displaytime proc   
     pusha
-    cmp currsec,0
-    jne notzero
-    clearscreentimer
-    notzero:
-    MOVECURSOR 40-5,1
+    MOVECURSOR 40-6,24
     DisplayNumber currmin
     DisplayChar ':'
     DisplayNumber currsec
@@ -349,7 +345,7 @@ upgradepawn proc
 
     mov al,2
     mov selectedpiece,al
-    
+
     notpawn:
     popa
     ret
