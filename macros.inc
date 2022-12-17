@@ -192,17 +192,29 @@ DisplayNumber macro number
 local label1
 local print1
 local exit
+local donotzero
 ;displays the number saved in memory variable x max size : 65535
     pusha
     mov al,number
     mov ah,0
-	mov cx,0
-    mov dx,0
-    cmp ax,0
-    jne label1
+
+    cmp ax,9
+    ja donotzero
     mov dx,'0'
     DisplayCharDX
-    jmp exit
+    mov al,number
+    mov ah,0
+
+    cmp ax,0
+    jne donotzero
+    mov dx,'0'
+    DisplayCharDX
+    mov al,number
+    mov ah,0
+
+    donotzero:
+	mov cx,0
+    mov dx,0 
     label1:
         ;exit when number reaches 0
         cmp ax,0
