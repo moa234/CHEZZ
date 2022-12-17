@@ -392,19 +392,16 @@ highlightforselectedpiece endp
 
 upgradepawn proc
     pusha
-    mov bx,row
-    mov ax,8
-    mul bx
-    mov bx,ax  ;bx store row*8
-    mov si,col ;SI store  col
 
     cmp selectedpiece,1
     jne notpawn
 
     cmp row,0
     jne notpawn
+
     mov al,2
     mov selectedpiece,al
+    
     notpawn:
     popa
     ret
