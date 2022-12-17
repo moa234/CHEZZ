@@ -23,7 +23,7 @@ updatetime proc
     cmp cl, startmin
     jb currminakbar
     jmp incmin
-    
+
     currminakbar:
     add cl,60
     
@@ -193,7 +193,6 @@ movefromcelltocell proc
     mov movingopflag,di
     jmp nomovingneeded  ;we set moving flag as moving flag =0 and there is a piece in this square
 
-
     movingflagon:
     mov bx,row
     mov ax,8
@@ -212,6 +211,7 @@ movefromcelltocell proc
     jmp nomovingneeded
 
     movingneeded:
+    call upgradepawn
     mov al,selectedpiece
     mov board[bx][si],al
     mov dl,01h
@@ -338,6 +338,25 @@ highlightforselectedpiece proc
     ret
 highlightforselectedpiece endp
 
+upgradepawn proc
+    pusha
+    mov bx,row
+    mov ax,8
+    mul bx
+    mov bx,ax  ;bx store row*8
+    mov si,col ;SI store  col
+
+    cmp selectedpiece,1
+    jne notpawn
+
+    cmp row,0
+    jne notpawn
+    mov al,2
+    mov selectedpiece,al
+    notpawn:
+    popa
+    ret
+upgradepawn endp
 
 deletehighlight proc
     pusha
