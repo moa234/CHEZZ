@@ -79,7 +79,7 @@ drawborder proc
     cld
 
     mov di,currpos
-    mov al,05h
+    mov al,bordercolor
 
     mov dx,2
     drawtopborder:

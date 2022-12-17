@@ -1,4 +1,112 @@
 .code
+Displaytime proc   
+    pusha
+    cmp currsec,0
+    jne notzero
+    clearscreentimer
+    notzero:
+    MOVECURSOR 40-5,1
+    DisplayNumber currmin
+    DisplayChar ':'
+    DisplayNumber currsec
+    popa
+    ret
+Displaytime endp
+
+GeneratePowerUp proc 
+;this proc generates a powerup in a random empty box during the game, 
+;if a piece moves to that box it will have less time restriction 2sec instead of 3sec
+
+;so, first we need to generate a random row and col and check that it is empty (doesn't contain any piece)
+pusha
+
+checkifemptybox:
+  rand1:
+   MOV AH, 00h       ; interrupts to get system time        
+   INT 1AH           ; CX:DX now hold number of clock ticks since midnight      
+   mov  ax, dx
+   xor  dx, dx
+   mov  cx, 10    
+   div  cx           ; here dx contains the remainder of the division - from 0 to 9
+   cmp dl,7
+   ja rand1
+   mov dh,0
+   mov bx,dx 
+   
+   rand2:
+   MOV AH, 00h       ; interrupts to get system time        
+   INT 1AH           ; CX:DX now hold number of clock ticks since midnight      
+   mov  ax, dx
+   xor  dx, dx
+   mov  cx, 10    
+   div  cx           ; here dx contains the remainder of the division - from 0 to 9
+   cmp dl,7
+   ja rand2
+   mov dh,0
+   mov si,dx 
+
+   mov ax,bx
+   mov cx,8
+   mul cx
+   mov bx,ax
+   cmp board[bx][si],0   ;here we must check that the random generated position on the board is empty to add the powerup at this position
+   jne checkifemptybox
+   ;mov bx,38;;;;;;;;;;remove
+   ;mov si,2;;;;;;;;;;remove
+   mov board[bx][si], 44  ;we are going to define that powerupvalue is = 44, to recognize its place on the board
+
+popa
+ret
+GeneratePowerUp endp 
+
+updatetime proc
+    pusha
+
+    getsystemtime
+    cmp dh, startsec
+    jb currsecakbar
+
+    cmp cl, startmin
+    jb currminakbar
+    jmp incmin
+    
+    currminakbar:
+    add cl,60
+    
+    incmin:
+    sub cl,startmin
+    mov currmin,cl
+    jmp incsec
+
+    currsecakbar:
+    add dh,60
+
+    incsec:
+    sub dh,startsec
+    mov currsec,dh
+
+    popa
+    ret
+updatetime endp
+
+updatepiecestime proc
+    pusha
+    mov bx,row
+    mov ax,16
+    mul bx
+    mov bx,ax
+    mov si,col
+    mov ax,2
+    mul si
+    mov si,ax
+
+    mov al,currsec
+    mov ah,currmin
+    mov timerboard[bx][si],ax
+
+    popa
+    ret
+updatepiecestime endp
 
 updaterowandcol proc
     pusha
@@ -27,7 +135,7 @@ updaterowandcol proc
     ret
 updaterowandcol endp
 
-delnewpos proc
+delnewposhighlight proc
    pusha
    GetPixelColour pixelcol, pixelrow
    cmp al,07h
@@ -40,7 +148,7 @@ delnewpos proc
    call drawborder
    popa
    ret
-delnewpos endp
+delnewposhighlight endp
 
 traversecell proc
     pusha 
@@ -92,10 +200,10 @@ traversecell endp
 deleteselctedpiece proc
     pusha
     GetPixelColour selectedpixelcol, selectedpixelrow
-    mov di,currpos;;;;;;;
-    mov tempcurrpos,di;;;;;;
-    mov di,selectedpos;;;;;;
-    mov currpos,di;;;;;;
+    mov di,currpos
+    mov tempcurrpos,di
+    mov di,selectedpos
+    mov currpos,di
     cmp al,07h
     jne boxiswhite
     call drawboxgrey
@@ -103,8 +211,8 @@ deleteselctedpiece proc
     boxiswhite:
     call drawboxwhite
     drawisfinished:
-    mov di,tempcurrpos;;;;;
-    mov currpos,di;;;;;;;
+    mov di,tempcurrpos
+    mov currpos,di
     popa
     ret
 deleteselctedpiece endp
@@ -114,26 +222,41 @@ movefromcelltocell proc
     mov bx,row
     mov ax,8
     mul bx
-    mov bx,ax  ;bx store row*8
-    mov si,col ;SI store  col
+    mov bx,ax                 ;bx store row*8
+    mov si,col                ;SI store  col
     
     cmp movingopflag,1
     je movingflagon
 
-    cmp board[bx][si],0   ;moving flag =0 and no piece in this square so do nothing
+    cmp board[bx][si],0       ;moving flag =0 and no piece in this square so do nothing
+    jne skipnomovneededrelerror
+    jmp nomovingneeded
+    skipnomovneededrelerror:
+    call checktimeofpiece
+    cmp selectflag,0
     je nomovingneeded
 
     mov di,1
     mov movingopflag,di
-    jmp nomovingneeded  ;we set moving flag as moving flag =0 and there is a piece in this square
+    jmp nomovingneeded        ;we set moving flag as moving flag =0 and there is a piece in this square
 
 
     movingflagon:
     mov bx,row
     mov ax,8
     mul bx
-    mov bx,ax  ;bx store row*8
-    mov si,col ;SI store  col
+    mov bx,ax                 ;bx store row*8
+    mov si,col                ;SI store  col
+    cmp board[bx][si], 44     ;here we check that if the destination box conatain a powerup or not
+    jne nopowerup
+    mov ax,2                  ;remove edit 1 to 2
+    mov waitingtime,ax
+    nopowerup:
+    cmp board[bx][si], 12
+    jne redkingnotdead
+    mov al,1
+    mov redkingdead,al
+    redkingnotdead:
     cmp board[bx][si],6
     ja movingneeded
     cmp board[bx][si],0
@@ -143,7 +266,9 @@ movefromcelltocell proc
     movingneeded:
     mov al,selectedpiece
     mov board[bx][si],al
-    call delnewpos
+    mov dl,01h
+    mov bordercolor,dl
+    call delnewposhighlight
     call drawSelectedBluePiece
 
     mov bx,selectedrow
@@ -160,10 +285,191 @@ movefromcelltocell proc
     mov movingopflag,dx
     mov selectedpiece,dl
 
+    call updatepiecestime
+
     nomovingneeded:
     popa
     ret
 movefromcelltocell endp
+
+checktimeofpiece proc
+
+    mov bx,row
+    mov ax,16
+    mul bx
+    mov bx,ax
+    mov si,col
+    mov ax,2
+    mul si
+    mov si,ax
+
+    mov bx, timerboard[bx][si]
+    add bx,waitingtime
+    cmp bh,currmin
+    jne canmove
+    cmp currsec,bl
+    jae canmove
+    jmp cantmove
+    canmove:
+        mov selectflag,1
+        jmp endselectmove
+    cantmove:
+        mov selectflag,0
+    endselectmove:
+    ret
+checktimeofpiece endp
+
+highlightforselectedpiece proc
+    cmp selectflag,0
+    jne selecthighlight
+    jmp checkhighlight
+    selecthighlight:
+    cmp selectedpiece,1
+    je highpawn
+    cmp selectedpiece,6
+    je highRook
+    cmp selectedpiece,4
+    je highbishop
+    cmp selectedpiece,5
+    je highknight
+    cmp selectedpiece,3
+    je highking
+    cmp selectedpiece,2
+    je highqueen
+        
+    jmp checkhighlight
+    highpawn:
+        mov dl, 04h
+        mov bordercolor,dl
+        call drawborder
+        mov bordercolor,dl
+        call highlightpawn
+        jmp checkhighlight
+    highRook:
+        mov dl, 04h
+        mov bordercolor,dl
+        call drawborder
+        mov bordercolor,dl
+        call highlightrook
+        jmp checkhighlight
+    highbishop:
+        mov dl, 04h
+        mov bordercolor,dl
+        call drawborder
+        mov bordercolor,dl
+        call highlightbishop
+        jmp checkhighlight
+    highknight:
+        mov dl, 04h
+        mov bordercolor,dl
+        call drawborder
+        mov bordercolor,dl
+        call highlightknight
+        jmp checkhighlight
+    highking:
+        mov dl, 04h
+        mov bordercolor,dl
+        call drawborder
+        mov bordercolor,dl
+        call highlightKing
+        jmp checkhighlight
+    highqueen:
+        mov dl, 04h
+        mov bordercolor,dl
+        call drawborder
+        mov bordercolor,dl
+        call highlightqueen
+        
+    checkhighlight:
+    cmp highlightflag,1
+    ;je gotowhiletrue
+    ;mov bl,0
+    ;mov movingopflag,0
+    ;gotowhiletrue:
+
+    ret
+highlightforselectedpiece endp
+
+
+deletehighlight proc
+    pusha
+    mov di,currpos
+    mov tempcurrpos,di
+    mov currpos,0
+    call updaterowandcol
+
+    rows22:
+        mov cx,4
+        row123:
+            call checkboxcolor
+            cmp boxcolor,0ah
+            jne noneedtodeletegreen
+            call drawboxwhite
+            call checkpiece
+            cmp al,0
+            je noneedtodeletegreen
+            call drawSelectedRedPiece
+            noneedtodeletegreen:
+            add currpos,25
+            call updaterowandcol
+
+
+            call checkboxcolor
+            cmp boxcolor,0ah
+            jne noneedtodeletegreen2
+            call drawboxgrey
+            call checkpiece
+            cmp al,0
+            je noneedtodeletegreen2
+            call drawSelectedRedPiece
+            noneedtodeletegreen2:
+            add currpos,25
+            call updaterowandcol
+            
+        loop row123
+
+        mov cx,4
+        add currpos,320*25-25*8
+        call updaterowandcol
+        row221:
+            call checkboxcolor
+            cmp boxcolor,0ah
+            jne noneedtodeletegreen3
+            call drawboxgrey
+            call checkpiece
+            cmp al,0
+            je noneedtodeletegreen3
+            call drawSelectedRedPiece
+            noneedtodeletegreen3:
+            add currpos,25
+            call updaterowandcol
+
+            call checkboxcolor
+            cmp boxcolor,0ah
+            jne noneedtodeletegreen4
+            call drawboxwhite
+            call checkpiece
+            cmp al,0
+            je noneedtodeletegreen4
+            call drawSelectedRedPiece
+            noneedtodeletegreen4:
+            add currpos,25
+            call updaterowandcol
+        loop row221
+
+        add currpos,320*25-25*8
+        call updaterowandcol
+        cmp currpos,320*25*8
+    jz notrows22
+    jmp rows22
+    notrows22:
+
+    mov di,tempcurrpos
+    mov currpos,di
+    call updaterowandcol
+     popa
+     ret
+deletehighlight endp
 
 
 highlightpawn proc
@@ -178,6 +484,8 @@ highlightpawn proc
 
     call checkpiece
     cmp al,0
+    je nopiece
+    cmp al,44
     je nopiece
     jmp pawnstart
     nopiece:
@@ -195,6 +503,8 @@ highlightpawn proc
     call checkpiece
     cmp al,0
     je nopiece2
+    cmp al,44
+    je nopiece2
     jmp pawnstart
     nopiece2:
     call highlightbox
@@ -207,6 +517,8 @@ highlightpawn proc
     sub ax,320*25-25
     mov currpos,ax
     call updaterowandcol
+    cmp col,7
+    ja notrightpawn
     mov highlightpos,ax
 
     call checkpiece
@@ -222,6 +534,8 @@ highlightpawn proc
     sub ax,50
     mov currpos,ax
     call updaterowandcol
+    cmp col,7
+    ja endhighpawn
     mov highlightpos,ax
 
     call checkpiece
@@ -256,6 +570,8 @@ highlightRook proc
         call checkpiece
         cmp al,0
         je highlightup@rook
+        cmp al,44
+        je highlightup@rook
         cmp al,6
         ja enemypiecefoundup@rook
         jmp piecefoundup@rook
@@ -288,6 +604,8 @@ highlightRook proc
         
         call checkpiece
         cmp al,0
+        je highlightleft@rook
+        cmp al,44
         je highlightleft@rook
         cmp al,6
         ja enemypiecefoundleft@rook
@@ -322,6 +640,8 @@ highlightRook proc
         call checkpiece
         cmp al,0
         je highlightdown@rook
+        cmp al,44
+        je highlightdown@rook
         cmp al,6
         ja enemypiecefounddown@rook
         jmp piecefounddown@rook
@@ -354,6 +674,8 @@ highlightRook proc
         
         call checkpiece
         cmp al,0
+        je highlightright@rook
+        cmp al,44
         je highlightright@rook
         cmp al,6
         ja enemypiecefoundright@rook
@@ -396,6 +718,8 @@ highlightBishop proc
         call checkpiece
         cmp al,0
         je highlightup@Bishop
+        cmp al,44
+        je highlightup@Bishop
         cmp al,6
         ja enemypiecefoundup@Bishop
         jmp piecefoundup@Bishop
@@ -430,6 +754,8 @@ highlightBishop proc
         
         call checkpiece
         cmp al,0
+        je highlightleft@Bishop
+        cmp al,44
         je highlightleft@Bishop
         cmp al,6
         ja enemypiecefoundleft@Bishop
@@ -466,6 +792,8 @@ highlightBishop proc
         call checkpiece
         cmp al,0
         je highlightdown@Bishop
+        cmp al,44
+        je highlightdown@Bishop
         cmp al,6
         ja enemypiecefounddown@Bishop
         jmp piecefounddown@Bishop
@@ -500,6 +828,8 @@ highlightBishop proc
         
         call checkpiece
         cmp al,0
+        je highlightright@Bishop
+        cmp al,44
         je highlightright@Bishop
         cmp al,6
         ja enemypiecefoundright@Bishop
@@ -540,7 +870,8 @@ highlightKing proc
         call checkpiece
         cmp al,0
         je highlight1@king
-
+        cmp al,44
+        je highlight1@king
         cmp al,6
         ja enemypiecefound1@king
         jmp piecefound1@king
@@ -572,7 +903,8 @@ highlightKing proc
         call checkpiece
         cmp al,0
         je highlight2@king
-
+        cmp al,44
+        je highlight2@king
         cmp al,6
         ja enemypiecefound2@king
         jmp piecefound2@king
@@ -606,7 +938,8 @@ highlightKing proc
         call checkpiece
         cmp al,0
         je highlight3@king
-
+        cmp al,44
+        je highlight3@king
         cmp al,6
         ja enemypiecefound3@king
         jmp piecefound3@king
@@ -640,7 +973,8 @@ highlightKing proc
         call checkpiece
         cmp al,0
         je highlight4@king
-
+        cmp al,44
+        je highlight4@king
         cmp al,6
         ja enemypiecefound4@king
         jmp piecefound4@king
@@ -674,7 +1008,8 @@ highlightKing proc
         call checkpiece
         cmp al,0
         je highlight5@king
-
+        cmp al,44
+        je highlight5@king
         cmp al,6
         ja enemypiecefound5@king
         jmp piecefound5@king
@@ -709,7 +1044,8 @@ highlightKing proc
         call checkpiece
         cmp al,0
         je highlight6@king
-
+        cmp al,44
+        je highlight6@king
         cmp al,6
         ja enemypiecefound6@king
         jmp piecefound6@king
@@ -740,7 +1076,8 @@ highlightKing proc
         call checkpiece
         cmp al,0
         je highlight7@king
-
+        cmp al,44
+        je highlight7@king
         cmp al,6
         ja enemypiecefound7@king
         jmp piecefound7@king
@@ -772,6 +1109,8 @@ highlightKing proc
         je piecefound8@king
         call checkpiece
         cmp al,0
+        je highlight8@king
+        cmp al,44
         je highlight8@king
         cmp al,6
         ja enemypiecefound8@king
@@ -814,6 +1153,8 @@ highlightknight proc
         call checkpiece
         cmp al,0
         je highlight2xy1@Knight
+        cmp al,44
+        je highlight2xy1@Knight
 
         cmp al,6
         ja enemypiecefound2xy1@Knight
@@ -848,7 +1189,8 @@ highlightknight proc
         call checkpiece
         cmp al,0
         je highlightneg2xy@Knight
-
+        cmp al,44
+        je highlightneg2xy@Knight
         cmp al,6
         ja enemypiecefoundneg2xy@Knight
         jmp piecefoundneg2xy@Knight
@@ -880,6 +1222,8 @@ highlightknight proc
         je piecefoundneg2xnegy@Knight
         call checkpiece
         cmp al,0
+        je highlightneg2xnegy@Knight
+        cmp al,44
         je highlightneg2xnegy@Knight
 
         cmp al,6
@@ -914,7 +1258,8 @@ highlightknight proc
         call checkpiece
         cmp al,0
         je highlight2xnegy@Knight
-
+        cmp al,44
+        je highlight2xnegy@Knight
         cmp al,6
         ja enemypiecefound2xnegy@Knight
         jmp piecefound2xnegy@Knight
@@ -946,6 +1291,8 @@ highlightknight proc
         jb piecefoundnegx2y@Knight
         call checkpiece
         cmp al,0
+        je highlightnegx2y@Knight
+        cmp al,44
         je highlightnegx2y@Knight
 
         cmp al,6
@@ -980,6 +1327,8 @@ highlightknight proc
         call checkpiece
         cmp al,0
         je highlightx2y@Knight
+        cmp al,44
+        je highlightx2y@Knight
 
         cmp al,6
         ja enemypiecefoundx2y@Knight
@@ -1012,6 +1361,8 @@ highlightknight proc
         ja piecefoundxneg2y@Knight
         call checkpiece
         cmp al,0
+        je highlightxneg2y@Knight
+        cmp al,44
         je highlightxneg2y@Knight
 
         cmp al,6
@@ -1046,6 +1397,8 @@ highlightknight proc
         call checkpiece
         cmp al,0
         je highlightnegxneg2y@Knight
+        cmp al,44
+        je highlightnegxneg2y@Knight
 
         cmp al,6
         ja enemypiecefoundnegxneg2y@Knight
@@ -1069,6 +1422,15 @@ highlightknight proc
     popa
     ret
 highlightKnight endp
+
+highlightqueen proc
+    pusha
+
+    call highlightrook
+    call highlightbishop
+
+    popa
+highlightqueen endp
 
 checkboxcolor proc
     pusha

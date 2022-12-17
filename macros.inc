@@ -10,6 +10,18 @@ clearscreen MACRO
 ENDM clearscreen
 ;============================================================================================
 
+;====================CLEARSCREENat=============================================================
+clearscreentimer MACRO
+    pusha
+    mov ax,0700h
+    mov bh,00
+    mov cx,0126h
+    mov dx,0128H
+    int 10h
+    popa
+ENDM clearscreen
+;============================================================================================
+
 ;====================scrollup=============================================================
 scrollup MACRO from,to
     pusha
@@ -68,6 +80,12 @@ clearbuffer MACRO
 endm clearbuffer
 ;============================================================================================
 
+;==============================Getsystemtime================================================
+getsystemtime macro
+    mov ah,2ch
+    int 21h
+endm getsystemtime
+
 ;===============================ENTERTEXTMODE===============================================
 TEXTMODE MACRO 
     pusha
@@ -106,6 +124,12 @@ GETCURSORPOSINCHAT MACRO
 	MOV BH,2
 	INT 10H
 ENDM GETCURSORPOSINCHAT
+
+GETCURSOR MACRO 
+    mov ah,3h 
+    mov bh,0h 
+    int 10h    
+ENDM
 ;============================================================================================
 
 ;================================MOVECURSORPOSITION=========================================
@@ -157,21 +181,28 @@ ENDM PrintChar
 ;============================================================================================
 
 ;=====================DisplayASingleCharacter================================================
-DisplayCharDX MACRO MyChar
-    PUSHa
+DisplayCharDX MACRO
     MOV AH, 2
     INT 21H
-    POPa
 ENDM PrintChar
 ;============================================================================================
 
 ;=====================================DisplayNumber==========================================
 DisplayNumber macro number    
+local label1
+local print1
+local exit
 ;displays the number saved in memory variable x max size : 65535
     pusha
-    mov ax,number
+    mov al,number
+    mov ah,0
 	mov cx,0
     mov dx,0
+    cmp ax,0
+    jne label1
+    mov dx,'0'
+    DisplayCharDX
+    jmp exit
     label1:
         ;exit when number reaches 0
         cmp ax,0
