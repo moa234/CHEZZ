@@ -1,85 +1,85 @@
 .code
 Displaytime proc   
     pusha
-    MOVECURSOR 40-6,24
-    DisplayNumber currmin
-    DisplayChar ':'
-    DisplayNumber currsec
+    MOVECURSOR 40-6,24      ;move to location of time to diplay
+    DisplayNumber currmin   ;display the minutes
+    DisplayChar ':'         ;display the colon
+    DisplayNumber currsec   ;display the seconds
     popa
     ret
 Displaytime endp
 
 GeneratePowerUp proc 
-;this proc generates a powerup in a random empty box during the game, 
-;if a piece moves to that box it will have less time restriction 2sec instead of 3sec
+    ;this proc generates a powerup in a random empty box during the game, 
+    ;if a piece moves to that box it will have less time restriction 2sec instead of 3sec
 
-;so, first we need to generate a random row and col and check that it is empty (doesn't contain any piece)
-pusha
+    ;so, first we need to generate a random row and col and check that it is empty (doesn't contain any piece)
+    pusha
 
-checkifemptybox:
-  rand1:
-   MOV AH, 00h       ; interrupts to get system time        
-   INT 1AH           ; CX:DX now hold number of clock ticks since midnight      
-   mov  ax, dx
-   xor  dx, dx
-   mov  cx, 10    
-   div  cx           ; here dx contains the remainder of the division - from 0 to 9
-   cmp dl,7
-   ja rand1
-   mov dh,0
-   mov bx,dx 
-   
-   rand2:
-   MOV AH, 00h       ; interrupts to get system time        
-   INT 1AH           ; CX:DX now hold number of clock ticks since midnight      
-   mov  ax, dx
-   xor  dx, dx
-   mov  cx, 10    
-   div  cx           ; here dx contains the remainder of the division - from 0 to 9
-   cmp dl,7
-   ja rand2
-   mov dh,0
-   mov si,dx 
+    checkifemptybox:
+    rand1:
+    MOV AH, 00h       ; interrupts to get system time        
+    INT 1AH           ; CX:DX now hold number of clock ticks since midnight      
+    mov  ax, dx
+    xor  dx, dx
+    mov  cx, 10    
+    div  cx           ; here dx contains the remainder of the division - from 0 to 9
+    cmp dl,7
+    ja rand1
+    mov dh,0
+    mov bx,dx 
+    
+    rand2:
+    MOV AH, 00h       ; interrupts to get system time        
+    INT 1AH           ; CX:DX now hold number of clock ticks since midnight      
+    mov  ax, dx
+    xor  dx, dx
+    mov  cx, 10    
+    div  cx           ; here dx contains the remainder of the division - from 0 to 9
+    cmp dl,7
+    ja rand2
+    mov dh,0
+    mov si,dx 
 
-   mov ax,bx
-   mov cx,8
-   mul cx
-   mov bx,ax
-   cmp board[bx][si],0   ;here we must check that the random generated position on the board is empty to add the powerup at this position
-   jne checkifemptybox
-   mov bx,38;;;;;;;;;;remove
-   mov si,3;;;;;;;;;;remove
-   mov board[bx][si], 44  ;we are going to define that powerupvalue is = 44, to recognize its place on the board
+    mov ax,bx
+    mov cx,8
+    mul cx
+    mov bx,ax
+    cmp board[bx][si],0   ;here we must check that the random generated position on the board is empty to add the powerup at this position
+    jne checkifemptybox
+    mov bx,38;;;;;;;;;;remove
+    mov si,3;;;;;;;;;;remove
+    mov board[bx][si], 44  ;we are going to define that powerupvalue is = 44, to recognize its place on the board
 
-popa
-ret
+    popa
+    ret
 GeneratePowerUp endp 
 
 updatetime proc
     pusha
 
-    getsystemtime
-    cmp dh, startsec
-    jb currsecakbar
+    getsystemtime       ;get the current time
+    cmp dh, startsec    ;compare the current seconds with the start seconds
+    jb currsecas8ar     ;if the current seconds are less than the start seconds, then we need to add 60 to current second
 
-    cmp cl, startmin
-    jb currminakbar
-    jmp incmin
+    cmp cl, startmin    ;compare the current minutes with the start minutes
+    jb currminas8ar     ;if the current minutes are less than the start minutes, then we need to add 60 to current minutes
+    jmp incmin          ;else, increment the minutes
 
-    currminakbar:
-    add cl,60
+    currminas8ar:       
+    add cl,60           ;add 60 to smaller current time to handle a special case
     
     incmin:
-    sub cl,startmin
-    mov currmin,cl
-    jmp incsec
+    sub cl,startmin     ;subtract the start time from the current time
+    mov currmin,cl      ;store the current time in the currmin variable
+    jmp incsec          ;increment the seconds
 
-    currsecakbar:
-    add dh,60
+    currsecas8ar:
+    add dh,60           ;add 60 to smaller current time to handle a special case
 
     incsec:
-    sub dh,startsec
-    mov currsec,dh
+    sub dh,startsec     ;subtract the start time from the current time
+    mov currsec,dh      ;store the current time in the currsec variable
 
     popa
     ret
@@ -87,6 +87,7 @@ updatetime endp
 
 updatepiecestime proc
     pusha
+    ;get position of piece in timer board which is 8*8 word array
     mov bx,row
     mov ax,16
     mul bx
@@ -96,8 +97,9 @@ updatepiecestime proc
     mul si
     mov si,ax
 
+    ;store the current time in the timer board
     mov al,currsec
-    mov ah,currmin
+    mov ah,currmin  
     mov timerboard[bx][si],ax
 
     popa
@@ -106,7 +108,7 @@ updatepiecestime endp
 
 updaterowandcol proc
     pusha
-
+    ;
     mov ax, currpos
     mov bx,320
     mov dx,0
@@ -244,7 +246,7 @@ movefromcelltocell proc
     mov si,col                ;SI store  col
     cmp board[bx][si], 44     ;here we check that if the destination box conatain a powerup or not
     jne nopowerup
-    mov ax,1                  ;remove edit 1 to 2
+    mov ax,2                  ;remove edit 1 to 2
     mov waitingtime,ax
     nopowerup:
     cmp board[bx][si], 12
@@ -402,6 +404,78 @@ upgradepawn proc
     popa
     ret
 upgradepawn endp
+
+drawpiecestimer proc
+    pusha
+    mov di,currpos
+    mov tempcurrpos,di
+    mov currpos,11*320+3
+    
+
+    checkrow:
+        call updaterowandcol
+        call checktimeofpiece
+
+        sub bx,waitingtime
+        mov cl,currsec
+        sub cl,bl
+
+        cmp waitingtime,2
+        je powerupdrawtimer
+        cmp cl,3
+        jne not0
+        call deletetimer
+        not0:
+        cmp cl,0
+        jne not3
+        call draw3
+        jmp not1powerup
+        not3:
+        cmp cl,1
+        jne not2
+        call draw2
+        jmp not1powerup
+        not2:
+        cmp cl,2
+        jne not1
+        call draw1
+        jmp not1powerup
+        not1:
+
+        powerupdrawtimer:
+        cmp cl,2
+        jne not0powerup
+        call deletetimer
+        not0powerup:
+        cmp cl,0
+        jne not2powerup
+        call draw2
+        jmp not1powerup
+        not2powerup:
+        cmp cl,1
+        jne not1powerup
+        call draw1
+        not1powerup:
+
+        cmp col,7
+        jne samerow@timerdraw
+        add currpos,320*25-8*25
+        cmp row,7
+        je lastcell
+        samerow@timerdraw:
+        add currpos,25
+        
+    jmp checkrow
+
+    lastcell:
+
+    mov di,tempcurrpos
+    mov currpos,di
+    call updaterowandcol
+
+    popa
+    ret
+drawpiecestimer endp
 
 deletehighlight proc
     pusha

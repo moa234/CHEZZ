@@ -28,7 +28,7 @@ selectedpixelcol dw 0
 selectedpixelrow dw 0
 selectedpiece db 0
 redkingdead db 0
-waitingtime dw 4
+waitingtime dw 3
 powerupflag db 0
 ;--------------------------------------------------
 highlightpos dw 0
@@ -50,7 +50,7 @@ board db 8,9,10,11,12,10,9,8
       db 1,1,1,1,1,1,1,1
       db 6,5,4,2,3,4,5,6
      
-timerboard dw 8*8 dup(-3)
+timerboard dw 8*8 dup(-5)
 
 startsec db 0
 startmin db 0
@@ -91,7 +91,8 @@ main proc far
         notendgame:
         call updatetime
         call Displaytime
-        
+        call drawpiecestimer
+
         mov selectflag,1
         cmp highlightflag,1
         jne donotchange
@@ -144,7 +145,7 @@ main proc far
     call menu
 
     MOV AH, 4CH
-    MOV AL, 01 ;your return code.
+    MOV AL, 00 ;your return code.
     INT 21H
 main endp
 end main
