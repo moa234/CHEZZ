@@ -302,8 +302,17 @@ checktimeofpiece proc
 
     mov bx, timerboard[bx][si]
     add bx,waitingtime
-    cmp bh,currmin
-    jne canmove
+
+    cmp bl,60
+    jb NotInNextMinute
+    sub bl,60
+    inc bh
+    NotInNextMinute:
+
+    cmp currmin,bh
+    jb cantmove
+    ja canmove
+
     cmp currsec,bl
     jae canmove
     jmp cantmove
@@ -415,43 +424,54 @@ drawpiecestimer proc
         call updaterowandcol
         call checktimeofpiece
 
-        sub bx,waitingtime
-        mov cl,currsec
-        sub cl,bl
+        cmp currmin,bh
+        jb sixtysubcurrsec
+        sub bl,currsec
+        jmp no60sub
+        sixtysubcurrsec:
+        mov cl,60
+        sub cl,currsec
+        add bl,cl
+        no60sub:
 
         cmp waitingtime,2
         je powerupdrawtimer
-        cmp cl,3
+        cmp bl,0
         jne not0
         call deletetimer
         not0:
-        cmp cl,0
+        cmp selectflag,1
+        je not1powerup
+        cmp bl,3
         jne not3
         call draw3
         jmp not1powerup
         not3:
-        cmp cl,1
+        cmp bl,2
         jne not2
         call draw2
         jmp not1powerup
         not2:
-        cmp cl,2
+        cmp bl,1
         jne not1
         call draw1
-        jmp not1powerup
         not1:
+        jmp not1powerup
+        
 
         powerupdrawtimer:
-        cmp cl,2
+        cmp bl,0
         jne not0powerup
         call deletetimer
         not0powerup:
-        cmp cl,0
+        cmp selectflag,1
+        je not1powerup
+        cmp bl,2
         jne not2powerup
         call draw2
         jmp not1powerup
         not2powerup:
-        cmp cl,1
+        cmp bl,1
         jne not1powerup
         call draw1
         not1powerup:

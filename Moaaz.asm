@@ -50,7 +50,7 @@ board db 8,9,10,11,12,10,9,8
       db 1,1,1,1,1,1,1,1
       db 6,5,4,2,3,4,5,6
      
-timerboard dw 8*8 dup(-5)
+timerboard dw 8*8 dup(-3)
 
 startsec db 0
 startmin db 0
