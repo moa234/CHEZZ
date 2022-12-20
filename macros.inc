@@ -66,7 +66,7 @@ local nodatarecieved
     in al,dx
     mov recieveddata,al
     nodatarecieved:
-recieveserial endm
+endm recieveserial
 
 ;====================CLEARSCREENat=============================================================
 clearscreentimer MACRO
