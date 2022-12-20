@@ -50,6 +50,24 @@ local registerempty
     endsendserial:
 endm sendserial
 
+sendserialword macro data
+local endsendserial
+local registerempty
+    mov dx,3FDH
+    in al,dx
+    and al,00100000b
+    jnz registerempty
+    jmp endsendserial
+
+    idk3:
+
+    ;transmits the data
+    mov dx,3f8h
+    mov al,data
+    out dx,al
+    endsendserial:
+endm sendserialword
+
 recieveserial macro recieveddata
 local continuereceiving
 local nodatarecieved
@@ -67,6 +85,24 @@ local nodatarecieved
     mov recieveddata,al
     nodatarecieved:
 endm recieveserial
+
+recieveserialword macro recieveddata
+local continuereceiving
+local nodatarecieved
+
+    ;check if data is recieved
+    mov dx,3FDH
+    in al , dx 
+    and al,1
+    jnz continuereceiving
+    jmp nodatarecieved
+    ;recieve data
+    continuereceiving:
+    mov dx,3f8h
+    in al,dx
+    mov recieveddata,al
+    nodatarecieved:
+endm recieveserialword
 
 ;====================CLEARSCREENat=============================================================
 clearscreentimer MACRO

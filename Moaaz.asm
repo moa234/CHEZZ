@@ -34,6 +34,7 @@ selectedpiece db 0
 redkingdead db 0
 waitingtime dw 3
 powerupflag db 0
+startingflag db 0
 ;--------------------------------------------------
 highlightpos dw 0
 highlightflag db 0
@@ -72,6 +73,7 @@ main proc far
     
     
     call initializegame
+    initializeserial
     whiletrue:
         cmp currmin,0
         je gotosec

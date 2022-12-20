@@ -268,7 +268,7 @@ movefromcelltocell proc            ;this proc is responsible for moving a piece 
     mov dl,01h
     mov bordercolor,dl            ;change border color to blue
     call delnewposhighlight       ;delete highlight of destination cell
-    call drawSelectedBluePiece    ;draw the moving piece at the destination cell
+    call drawSelectedPiece    ;draw the moving piece at the destination cell
  
     mov bx,selectedrow
     mov ax,8
@@ -520,7 +520,7 @@ deletehighlight proc      ;this proc removes the highlight of each piece after m
             call checkpiece              
             cmp al,0                     ;check if there is no piece in the cell
             je noneedtodeletegreen
-            call drawSelectedRedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
+            call drawSelectedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
             noneedtodeletegreen:
             add currpos,25               ;update the currpos to goto the next box
             call updaterowandcol         ;update teh row and col for the new currpos 
@@ -533,7 +533,7 @@ deletehighlight proc      ;this proc removes the highlight of each piece after m
             call checkpiece
             cmp al,0                     ;check if there is no piece in the cell
             je noneedtodeletegreen2
-            call drawSelectedRedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
+            call drawSelectedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
             noneedtodeletegreen2:
             add currpos,25               ;update the currpos to goto the next box
             call updaterowandcol         ;update the row and col for the new currpos 
@@ -551,7 +551,7 @@ deletehighlight proc      ;this proc removes the highlight of each piece after m
             call checkpiece
             cmp al,0                     ;check if there is no piece in the cell
             je noneedtodeletegreen3
-            call drawSelectedRedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
+            call drawSelectedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
             noneedtodeletegreen3:
             add currpos,25               ;update the currpos to goto the next box
             call updaterowandcol         ;update the row and col for the new currpos 
@@ -563,7 +563,7 @@ deletehighlight proc      ;this proc removes the highlight of each piece after m
             call checkpiece
             cmp al,0                     ;check if there is no piece in the cell
             je noneedtodeletegreen4
-            call drawSelectedRedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
+            call drawSelectedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
             noneedtodeletegreen4:
             add currpos,25               ;update the currpos to goto the next box
             call updaterowandcol         ;update the row and col for the new currpos
@@ -656,7 +656,7 @@ highlightpawn proc
     enemypiece:
     call highlightbox
     ;if the piece is an enemy piece, it will draw the piece in red
-    call drawSelectedRedPiece
+    call drawSelectedPiece
     notrightpawn:
 
     ;sets highlight position in the cell to the top left of the pawn
@@ -681,7 +681,7 @@ highlightpawn proc
     enemypiece2:
     call highlightbox
     ;if the piece is an enemy piece, it will draw the piece in red
-    call drawSelectedRedPiece
+    call drawSelectedPiece
     endhighpawn:
 
     ;return the currpos to the original position
@@ -721,7 +721,7 @@ highlightRook proc
         jmp piecefoundup@rook
         enemypiecefoundup@rook:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundup@rook
         
         highlightup@rook:
@@ -760,7 +760,7 @@ highlightRook proc
         jmp piecefoundleft@rook
         enemypiecefoundleft@rook:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundleft@rook
         
         highlightleft@rook:
@@ -801,7 +801,7 @@ highlightRook proc
         jmp piecefounddown@rook
         enemypiecefounddown@rook:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefounddown@rook
         
         highlightdown@rook:
@@ -843,7 +843,7 @@ highlightRook proc
         jmp piecefoundright@rook
         enemypiecefoundright@rook:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundright@rook
         
         highlightright@rook:
@@ -886,7 +886,7 @@ highlightBishop proc
         jmp piecefoundup@Bishop
         enemypiecefoundup@Bishop:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundup@Bishop
         
         highlightup@Bishop:
@@ -923,7 +923,7 @@ highlightBishop proc
         jmp piecefoundleft@Bishop
         enemypiecefoundleft@Bishop:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundleft@Bishop
         
         highlightleft@Bishop:
@@ -960,7 +960,7 @@ highlightBishop proc
         jmp piecefounddown@Bishop
         enemypiecefounddown@Bishop:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefounddown@Bishop
         
         highlightdown@Bishop:
@@ -997,7 +997,7 @@ highlightBishop proc
         jmp piecefoundright@Bishop
         enemypiecefoundright@Bishop:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundright@Bishop
         
         highlightright@Bishop:
@@ -1039,7 +1039,7 @@ highlightKing proc
         
         enemypiecefound1@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound1@king
         
         highlight1@king:
@@ -1072,7 +1072,7 @@ highlightKing proc
         
         enemypiecefound2@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound2@king
         
         highlight2@king:
@@ -1107,7 +1107,7 @@ highlightKing proc
         
         enemypiecefound3@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound3@king
         
         highlight3@king:
@@ -1142,7 +1142,7 @@ highlightKing proc
         
         enemypiecefound4@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound4@king
         
         highlight4@king:
@@ -1177,7 +1177,7 @@ highlightKing proc
         
         enemypiecefound5@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound5@king
         
         highlight5@king:
@@ -1213,7 +1213,7 @@ highlightKing proc
         
         enemypiecefound6@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound6@king
         
         highlight6@king:
@@ -1245,7 +1245,7 @@ highlightKing proc
         
         enemypiecefound7@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound7@king
         
         highlight7@king:
@@ -1279,7 +1279,7 @@ highlightKing proc
         
         enemypiecefound8@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound8@king
         
         highlight8@king:
@@ -1323,7 +1323,7 @@ highlightknight proc
         
         enemypiecefound2xy1@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound2xy1@Knight
         
         highlight2xy1@Knight:
@@ -1358,7 +1358,7 @@ highlightknight proc
         
         enemypiecefoundneg2xy@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundneg2xy@Knight
         
         highlightneg2xy@Knight:
@@ -1393,7 +1393,7 @@ highlightknight proc
         
         enemypiecefoundneg2xnegy@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundneg2xnegy@Knight
         
         highlightneg2xnegy@Knight:
@@ -1427,7 +1427,7 @@ highlightknight proc
         
         enemypiecefound2xnegy@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound2xnegy@Knight
         
         highlight2xnegy@Knight:
@@ -1462,7 +1462,7 @@ highlightknight proc
         
         enemypiecefoundnegx2y@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundnegx2y@Knight
         
         highlightnegx2y@Knight:
@@ -1497,7 +1497,7 @@ highlightknight proc
         
         enemypiecefoundx2y@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundx2y@Knight
         
         highlightx2y@Knight:
@@ -1532,7 +1532,7 @@ highlightknight proc
         
         enemypiecefoundxneg2y@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundxneg2y@Knight
         
         highlightxneg2y@Knight:
@@ -1567,7 +1567,7 @@ highlightknight proc
         
         enemypiecefoundnegxneg2y@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundnegxneg2y@Knight
         
         highlightnegxneg2y@Knight:

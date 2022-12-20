@@ -8,6 +8,18 @@ initializegame proc
     
     GraphicsMode
 
+    cmp startingflag,1
+    je stayasis
+    mov al,12
+    mov board[0][3],al
+    mov al,11
+    mov board[0][4],al
+    mov al,3
+    mov board[7*8][3],al
+    mov al,2
+    mov board[7*8][4],al
+    stayasis:
+
     call drawboard
     call initializepieces
     mov currpos,320*25*3+25*3
@@ -16,11 +28,9 @@ initializegame proc
     mov startmin, cl
     mov startsec, dh 
 
-    mov cx,8*8*2
-    mov dl,startsec
-    mov dh,startmin
-
     
+
+
 
     ret
 initializegame ENDP
@@ -28,55 +38,29 @@ initializegame ENDP
 initializepieces proc
     pusha
 
+    mov di,currpos
+    mov tempcurrpos,di
     mov currpos,0
 
-    call DrawRookRed
-    add currpos,25
-    call DrawKnightRed
-    add currpos,25
-    call DrawBishopRed
-    add currpos,25
-    call DrawQueenRed
-    add currpos,25
-    call DrawKingRed
-    add currpos,25
-    call DrawBishopRed
-    add currpos,25
-    call DrawKnightRed
-    add currpos,25
-    call DrawRookRed
-    mov currpos,320*25
-    mov cx,8
-    pawndrawred:
-        call DrawPawnRed
+    piecesloopdraw:
+        call updaterowandcol
+        call checkpiece
+        call drawSelectedPiece
+
+        cmp col,7
+        jne samerow@pieces
+        add currpos,320*25-8*25
+        cmp row,7
+        je lastcell@pieces
+        samerow@pieces:
         add currpos,25
-    loop pawndrawred
 
-    mov currpos,320*25*6
-    mov cx,8
-    pawndrawblue:
-        call DrawPawnBlue
-        add currpos,25
-    loop pawndrawblue
+    jmp piecesloopdraw
+    lastcell@pieces:
 
-    mov currpos,320*25*7
-    call DrawRookBlue
-    add currpos,25
-    call DrawKnightBlue
-    add currpos,25
-    call DrawBishopBlue
-    add currpos,25
-    call DrawQueenBlue
-    add currpos,25
-    call DrawKingBlue
-    add currpos,25
-    call DrawBishopBlue
-    add currpos,25
-    call DrawKnightBlue
-    add currpos,25
-    call DrawRookBlue
-
-
+    mov di,tempcurrpos
+    mov currpos,di
+    call updaterowandcol
 
     popa
     ret
