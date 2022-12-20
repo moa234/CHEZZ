@@ -47,8 +47,8 @@ GeneratePowerUp proc
     mov bx,ax
     cmp board[bx][si],0   ;here we must check that the random generated position on the board is empty to add the powerup at this position
     jne checkifemptybox
-    mov bx,38;;;;;;;;;;remove
-    mov si,3;;;;;;;;;;remove
+    ;mov bx,38;;;;;;;;;;remove
+    ;mov si,3;;;;;;;;;;remove
     mov board[bx][si], 44  ;we are going to define that powerupvalue is = 44, to recognize its place on the board
 
     popa
@@ -106,17 +106,19 @@ updatepiecestime proc
     ret
 updatepiecestime endp
 
+
 updaterowandcol proc
     pusha
-    ;
+    ;here we store the pixelrow and pixelcol according to currpos as they are easier to draw with rather than normal row and col
     mov ax, currpos
     mov bx,320
     mov dx,0
     div bx
     mov pixelrow, ax
     mov pixelcol, dx
-
     push dx
+
+    ;here we use pixelrow and pixelcol to get normal row and col to be used in addressing the board, (row is not multiplied with 8, when row will be used to access the board it will be multiplied by 8 first)
     mov dx,0
     mov bx,25
     div bx
@@ -301,6 +303,10 @@ checktimeofpiece proc
     mov si,ax
 
     mov bx, timerboard[bx][si]
+
+    cmp bx,-3
+    je canmove
+
     add bx,waitingtime
 
     cmp bl,60
@@ -312,7 +318,7 @@ checktimeofpiece proc
     cmp currmin,bh
     jb cantmove
     ja canmove
-
+  
     cmp currsec,bl
     jae canmove
     jmp cantmove
@@ -387,7 +393,7 @@ highlightforselectedpiece proc     ;this proc see the value of the selected piec
         call highlightqueen
         
     checkhighlight:
-    cmp highlightflag,1
+    ;cmp highlightflag,1
     ;je gotowhiletrue
     ;mov bl,0
     ;mov movingopflag,0

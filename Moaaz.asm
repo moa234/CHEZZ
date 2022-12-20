@@ -63,7 +63,6 @@ include gameui.inc
 include gamelog.inc
 .code
 main proc far
-    ;set ds
     mov ax,@data
     mov ds,ax
     
@@ -74,34 +73,36 @@ main proc far
         cmp currmin,0
         je gotosec
         jmp noneedtogeneratepowerup
+
         gotosec:
         cmp currsec,10
         je gotopowerflag
         jmp noneedtogeneratepowerup
+
         gotopowerflag:
         cmp powerupflag,0
         jne noneedtogeneratepowerup
         mov cl,1
         mov powerupflag,cl
         call GeneratePowerUp
+
         noneedtogeneratepowerup:
         cmp redkingdead,1
         jne notendgame
         jmp endgame
+
         notendgame:
         call updatetime
         call Displaytime
         call drawpiecestimer
-
         mov selectflag,1
         cmp highlightflag,1
         jne donotchange
-        
         cmp movingopflag,0
         jne donotchange 
         call deletehighlight
+
         donotchange:
-      
         getKeyPress
         jnz whilefalse
         jmp whiletrue
@@ -124,10 +125,9 @@ main proc far
         cmp al,'q'
         je whileq
         jmp whiletrue
-        whileq: 
-
-        call selection
         
+        whileq: 
+        call selection
         cmp movingopflag,1
         jne pass
         call checkboxcolor
