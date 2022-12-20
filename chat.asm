@@ -85,14 +85,20 @@ chatinitialize proc
 chatinitialize endp
 
 sendchat proc
-
+    ;check last column to in chat to scroll
     cmp byte ptr [thiscurs]+1, 0ch
     jnz noscroll
     scrollup 0100h,0b79h
     mov thiscurs, 0b06h
     noscroll:
 
+    ;move the cursor to next location of printing
     MOVECURSORINCHAT thiscurs
+
+    ;read key from user without waiting
+    ;if no key is pressed, return
+    ;if key is pressed, store it in variable
+    ;then clear the buffer to read next key
     GetKeyPress
     jnz key
     ret
@@ -101,18 +107,26 @@ sendchat proc
     mov bufferascii, AL
     clearbuffer
     
-    
+    ;check if key entered is f3 to end chat
+    ;makes endchat flag to 1 to end the chat
     cmp bufferscancode,3dh ;f3
     jz endchat
 
+    ;check if key entered is enter to go to next line
     cmp bufferascii,0dh ;enter
     jz displayenter
 
+    ;check if key entered is backspace to delete last character
     cmp bufferascii,08h ;backspace
     jz backspace
 
+    ;display the character on the screen
     DisplayChar bufferascii
     
+    ;move the cursor to next location of printing
+    ;check if the cursor is at the end of the line
+    ;if yes, move it to the next line
+    ;if no, move it to the next column
     inc thiscurs
     cmp byte ptr [thiscurs], 80
     jnz endofline
@@ -122,6 +136,10 @@ sendchat proc
     endofline:
     jmp sendchatserial
 
+    ;deletes the last character
+    ;moves the cursor to the last character 
+    ;does not go to previous line
+    ;deletes by displaying null character at position of last character
     backspace:
         dec thiscurs
         cmp byte ptr [thiscurs], 5
@@ -133,7 +151,6 @@ sendchat proc
         DisplayChar 0
     
     sendchatserial:
-    ;TODO: send to other player
 
     ;check if can send by checking if the register is empty
     mov dx,3FDH
