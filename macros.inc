@@ -10,6 +10,64 @@ clearscreen MACRO
 ENDM clearscreen
 ;============================================================================================
 
+;====================initializeserial=============================================================
+initializeserial macro
+    ;initialze port
+    mov dx,3FbH         
+    mov al,10000000b
+    out dx,al
+
+    mov dx,3f8h
+    mov al,0ch
+    out dx,al
+
+    mov dx,3f9h
+    mov al,00h
+    out dx,al
+
+    ;configuration
+    mov dx,3fbh
+    mov al,00011011b
+    out dx,al
+endm initializeserial
+;============================================================================================
+
+sendserial macro data
+local endsendserial
+local registerempty
+    mov dx,3FDH
+    in al,dx
+    and al,00100000b
+    jnz registerempty
+    jmp endsendserial
+
+    idk3:
+
+    ;transmits the data
+    mov dx,3f8h
+    mov al,data
+    out dx,al
+    endsendserial:
+endm sendserial
+
+recieveserial macro recieveddata
+local continuereceiving
+local nodatarecieved
+
+    ;check if data is recieved
+    mov dx,3FDH
+    in al , dx 
+    and al,1
+    jnz continuereceiving
+    jmp nodatarecieved
+    ;recieve data
+    continuereceiving:
+    mov dx,3f8h
+    in al,dx
+    mov recieveddata,al
+    nodatarecieved:
+recieveserial endm
+
 ;====================CLEARSCREENat=============================================================
 clearscreentimer MACRO
     pusha
