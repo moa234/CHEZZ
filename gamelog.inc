@@ -290,7 +290,8 @@ movefromcelltocell proc            ;this proc is responsible for moving a piece 
 movefromcelltocell endp
 
 checktimeofpiece proc
-
+    
+    ;get index of piece in timerboard by multyping row by 8*2 as it is stored as word then adding column
     mov bx,row
     mov ax,16
     mul bx
@@ -300,27 +301,31 @@ checktimeofpiece proc
     mul si
     mov si,ax
 
-    mov bx, timerboard[bx][si]
-    add bx,waitingtime
+    mov bx, timerboard[bx][si]  ;bx store the value of the piece in the timerboard
 
-    cmp bl,60
-    jb NotInNextMinute
-    sub bl,60
-    inc bh
+    cmp bx,-3
+    je canmove                 ;if the value of the piece in the timerboard is -3, it means that the piece did not move before
+
+    add bx,waitingtime          ;add the waiting time of the piece's team to the value of the piece in the timerboard
+
+    cmp bl,60                   ;check if the value of the piece in the timerboard is more than 60 sec
+    jb NotInNextMinute          ;if not, jump to the next instruction
+    sub bl,60                   ;if yes, subtract 60 from the value of the piece in the timerboard and move to next minute
+    inc bh                      ;increment minute
     NotInNextMinute:
 
-    cmp currmin,bh
-    jb cantmove
-    ja canmove
+    cmp currmin,bh              ;compare the current minute with the last move of piece + waitingtime
+    jb cantmove                 ;if current minute is less than the last move of piece + waitingtime, the piece can't move
+    ja canmove                  ;if current minute is more than the last move of piece + waitingtime, the piece can move
 
-    cmp currsec,bl
-    jae canmove
-    jmp cantmove
+    cmp currsec,bl              ;else if minutes are equal, compare the current second with the last move of piece + waitingtime
+    jae canmove                 ;piece can move if it is equal or greater
+    jmp cantmove                ;else it cannot move
     canmove:
-        mov selectflag,1
-        jmp endselectmove
+        mov selectflag,1        ;sets selection flag to true as the piece can move so it can be selected
+        jmp endselectmove       
     cantmove:
-        mov selectflag,0
+        mov selectflag,0        ;sets selection flag to false as the piece can't move so it can't be selected
     endselectmove:
     ret
 checktimeofpiece endp
@@ -572,21 +577,24 @@ deletehighlight proc      ;this proc removes the highlight of each piece after m
     mov di,tempcurrpos                   ;return back the entering currpos
     mov currpos,di
     call updaterowandcol                 ;update the row and col for the new currpos
-     popa
-     ret
+    popa
+    ret
 deletehighlight endp
 
 
 highlightpawn proc
     pusha
     
-    mov bx,currpos
-
+    ;sets the highlight position to the cell just above the pawn
+    mov bx,currpos          
     sub bx,320*25
     mov highlightpos,bx
     mov currpos,bx
     call updaterowandcol
 
+    ;then checks for a piece in that cell
+    ;if there is a piece, it will not highlight the cell
+    ;if there is no piece, it will highlight the cell
     call checkpiece
     cmp al,0
     je nopiece
@@ -596,15 +604,20 @@ highlightpawn proc
     nopiece:
     call highlightbox
 
+    ;then it will check if the pawn is in the starting position
     cmp selectedrow,6
     jne pawnstart
 
+    ;if it is in the starting position, it will check the cell 2 cells above it to highlight
     mov bx,currpos
     sub bx,320*25
     mov currpos,bx
     call updaterowandcol
     mov highlightpos,bx
 
+    ;then checks for a piece in that cell
+    ;if there is a piece, it will not highlight the cell
+    ;if there is no piece, it will highlight the cell
     call checkpiece
     cmp al,0
     je nopiece2
@@ -615,17 +628,23 @@ highlightpawn proc
     call highlightbox
     pawnstart:
     
+    ;return the currpos to the original position
     mov ax,selectedpos
     mov currpos,ax
     call updaterowandcol
 
+    ;sets highlight position in the cell to the top right of the pawn
     sub ax,320*25-25
     mov currpos,ax
     call updaterowandcol
+    ;checks if the pawn is in the rightmost column to not highlight the cell
     cmp col,7
     ja notrightpawn
     mov highlightpos,ax
 
+    ;then checks for a piece in that cell
+    ;if there is a piece, it will not highlight the cell
+    ;if there is no piece, it will highlight the cell
     call checkpiece
     cmp al,44
     je notrightpawn
@@ -634,17 +653,23 @@ highlightpawn proc
     jmp notrightpawn
     enemypiece:
     call highlightbox
+    ;if the piece is an enemy piece, it will draw the piece in red
     call drawSelectedRedPiece
-    
     notrightpawn:
+
+    ;sets highlight position in the cell to the top left of the pawn
     mov ax,currpos
     sub ax,50
     mov currpos,ax
     call updaterowandcol
+    ;checks if the pawn is in the leftmost column to not highlight the cell
     cmp col,7
     ja endhighpawn
     mov highlightpos,ax
 
+    ;then checks for a piece in that cell
+    ;if there is a piece, it will not highlight the cell
+    ;if there is no piece, it will highlight the cell
     call checkpiece
     cmp al,44
     je endhighpawn
@@ -653,9 +678,11 @@ highlightpawn proc
     jmp endhighpawn
     enemypiece2:
     call highlightbox
+    ;if the piece is an enemy piece, it will draw the piece in red
     call drawSelectedRedPiece
     endhighpawn:
 
+    ;return the currpos to the original position
     mov ax,selectedpos
     mov currpos,ax
     call updaterowandcol
@@ -666,16 +693,22 @@ highlightpawn endp
 
 highlightRook proc
     pusha
-
+    ;a loop to check the cells above the rook
     whilenopieceup@Rook:
+        ;check if the rook is in the top row
+        ;if it is, it will not highlight the cells above it
         cmp row,0
         je piecefoundup@rook
+        ;sets the highlight position to the cell above the rook and then the one above it and so on
         mov bx,currpos
         sub bx,320*25
         mov highlightpos,bx
         mov currpos,bx
         call updaterowandcol
         
+        ;then checks for a piece in that cell
+        ;if there is friend a piece, it will not highlight the cell
+        ;if there is an enemy piece, it will highlight the cell and draw the piece in red
         call checkpiece
         cmp al,0
         je highlightup@rook
@@ -697,20 +730,24 @@ highlightRook proc
         jmp whilenopieceup@Rook
         piecefoundup@rook:
     
-
+        ;return the currpos to the original position
         mov ax,selectedpos
         mov currpos,ax
         call updaterowandcol
     
     whilenopieceleft@rook:
+        ;check if the rook is in the leftmost column
         cmp col,0
         je piecefoundleft@rook
+        ;sets the highlight position to the cell to the left of the rook and then the one to the left of it and so on
         mov bx,currpos
         sub bx,25
         mov highlightpos,bx
         mov currpos,bx
         call updaterowandcol
-        
+        ;then checks for a piece in that cell
+        ;if there is friend a piece, it will not highlight the cell
+        ;if there is an enemy piece, it will highlight the cell and draw the piece in red
         call checkpiece
         cmp al,0
         je highlightleft@rook
@@ -732,20 +769,26 @@ highlightRook proc
         jmp whilenopieceleft@rook
         piecefoundleft@rook:
     
-
+        ;return the currpos to the original position
         mov ax,selectedpos
         mov currpos,ax
         call updaterowandcol
     
     whilenopiecedown@rook:
+        ;check if the rook is in the bottom row
         cmp row,7
         je piecefounddown@rook
+
+        ;sets the highlight position to the cell below the rook and then the one below it and so on
         mov bx,currpos
         add bx,320*25
         mov highlightpos,bx
         mov currpos,bx
         call updaterowandcol
-        
+
+        ;then checks for a piece in that cell
+        ;if there is friend a piece, it will not highlight the cell
+        ;if there is an enemy piece, it will highlight the cell and draw the piece in red
         call checkpiece
         cmp al,0
         je highlightdown@rook
@@ -767,20 +810,27 @@ highlightRook proc
         jmp whilenopiecedown@rook
         piecefounddown@rook:
     
-
+        ;return the currpos to the original position
         mov ax,selectedpos
         mov currpos,ax
         call updaterowandcol
     
     whilenopieceright@rook:
+        ;check if the rook is in the rightmost column
+        ;if it is, it will not highlight the cells to the right of it
         cmp col,7
         je piecefoundright@rook
+
+        ;sets the highlight position to the cell to the right of the rook and then the one to the right of it and so on
         mov bx,currpos
         add bx,25
         mov highlightpos,bx
         mov currpos,bx
         call updaterowandcol
         
+        ;then checks for a piece in that cell
+        ;if there is friend a piece, it will not highlight the cell
+        ;if there is an enemy piece, it will highlight the cell and draw the piece in red
         call checkpiece
         cmp al,0
         je highlightright@rook
@@ -802,7 +852,7 @@ highlightRook proc
         jmp whilenopieceright@rook
         piecefoundright@rook:
     
-
+        ;return the currpos to the original position
         mov ax,selectedpos
         mov currpos,ax
         call updaterowandcol
@@ -1567,9 +1617,11 @@ checkpiece endp
 
 selection proc
     pusha
-
+    ;checks if selected position have a piece that can be moved
     cmp movingopflag,1
     je secondq
+    ;if yes, then it will initialise the variables of selection
+    ;selectedpos, selectedcol, selectedrow, selectedpixelcol, selectedpixelrow, selectedpiece
     mov ax,currpos
     mov selectedpos,ax
     MOV ax,col
@@ -1581,6 +1633,7 @@ selection proc
     mov ax,pixelrow
     mov selectedpixelrow,ax
 
+    ;get the piece from the 2d board array and store it in selectedpiece
     mov bx,row
     mov ax,8
     mul bx

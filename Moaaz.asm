@@ -15,6 +15,10 @@ F2notif db "You sent a game invitation to Ahmed $"
 chatinviteflag db 0
 gameinviteflag db 0
 ;--------------------------------------------------
+myplayer db 16,?,16 dup('$')
+opponentplayer db 16,?,16 dup('$')
+startingplayer db 0
+;--------------------------------------------------
 currpos dw 0
 row dw 0
 col dw 0
@@ -67,7 +71,6 @@ main proc far
     mov ax,@data
     mov ds,ax
     
-    GraphicsMode
     
     call initializegame
     whiletrue:
