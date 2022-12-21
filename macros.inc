@@ -41,7 +41,7 @@ local registerempty
     jnz registerempty
     jmp endsendserial
 
-    idk3:
+    registerempty:
 
     ;transmits the data
     mov dx,3f8h
@@ -59,12 +59,12 @@ local registerempty
     jnz registerempty
     jmp endsendserial
 
-    idk3:
+    registerempty:
 
     ;transmits the data
     mov dx,3f8h
-    mov al,data
-    out dx,al
+    mov ax,data
+    out dx,ax
     endsendserial:
 endm sendserialword
 
@@ -99,8 +99,8 @@ local nodatarecieved
     ;recieve data
     continuereceiving:
     mov dx,3f8h
-    in al,dx
-    mov recieveddata,al
+    in ax,dx
+    mov recieveddata,ax
     nodatarecieved:
 endm recieveserialword
 
