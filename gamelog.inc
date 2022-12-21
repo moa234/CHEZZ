@@ -106,6 +106,12 @@ updatepiecestime proc
     ret
 updatepiecestime endp
 
+sendmove proc
+    sendserialword row
+    sendserialword col
+    sendserialword selectedrow
+    sendserialword currpos
+sendmove endp
 
 updaterowandcol proc
     pusha
@@ -233,7 +239,9 @@ movefromcelltocell proc            ;this proc is responsible for moving a piece 
     skipnomovneededrelerror:        ;moving flag = 0 and there is a piece in this box -> we will set moving flag in the upcoming instructions
     call checktimeofpiece
     cmp selectflag,0                ;select flag is already set in selection proc, so if no piece selected no moving will be needed
-    je nomovingneeded
+    jne nomovingneeded_rev
+    jmp nomovingneeded
+    nomovingneeded_rev:
 
     mov di,1
     mov movingopflag,di
@@ -263,13 +271,16 @@ movefromcelltocell proc            ;this proc is responsible for moving a piece 
 
     movingneeded: 
     call upgradepawn              ;check if there is a pawn that reached the top of the board and needs to be promoted
+
+    call sendmove
+
     mov al,selectedpiece
     mov board[bx][si],al          ;add the value of the selected piece to it's neew location in the 2d array board
     mov dl,01h
     mov bordercolor,dl            ;change border color to blue
     call delnewposhighlight       ;delete highlight of destination cell
     call drawSelectedPiece    ;draw the moving piece at the destination cell
- 
+
     mov bx,selectedrow
     mov ax,8
     mul bx

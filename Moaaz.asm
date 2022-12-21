@@ -20,10 +20,10 @@ opponentplayer db 16,?,16 dup('$')
 startingplayer db 0
 ;--------------------------------------------------
 currpos dw 0
-row dw 0
-col dw 0
-pixelrow dw 0
-pixelcol dw 0
+row dw 0 ;0-7
+col dw 0 ;0-7
+pixelrow dw 0 ;0-200
+pixelcol dw 0 ;0-320
 ;--------------------------------------------------
 selectedpos dw 0
 selectedcol dw 0
@@ -34,7 +34,7 @@ selectedpiece db 0
 redkingdead db 0
 waitingtime dw 3
 powerupflag db 0
-startingflag db 0
+startingflag db 1
 ;--------------------------------------------------
 highlightpos dw 0
 highlightflag db 0
