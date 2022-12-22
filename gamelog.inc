@@ -106,12 +106,12 @@ updatepiecestime proc
     ret
 updatepiecestime endp
 
-sendmove proc
-    sendserialword row
-    sendserialword col
-    sendserialword selectedrow
-    sendserialword currpos
-sendmove endp
+; sendmove proc
+;     sendserialword row
+;     sendserialword col
+;     sendserialword selectedrow
+;     sendserialword currpos
+; sendmove endp
 
 updaterowandcol proc
     pusha
@@ -272,7 +272,7 @@ movefromcelltocell proc            ;this proc is responsible for moving a piece 
     movingneeded: 
     call upgradepawn              ;check if there is a pawn that reached the top of the board and needs to be promoted
 
-    call sendmove
+    ;call sendmove
 
     mov al,selectedpiece
     mov board[bx][si],al          ;add the value of the selected piece to it's neew location in the 2d array board
