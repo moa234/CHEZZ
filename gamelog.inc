@@ -59,31 +59,31 @@ GeneratePowerUp proc
 GeneratePowerUp endp 
 
 sendPowerup proc
-pusha
-sendserial twohun
-sendserial powerupcol
-sendserial poweruprow
-popa
-ret
+    pusha
+    sendserial twohun
+    sendserial powerupcol
+    sendserial poweruprow
+    popa
+    ret
 sendPowerup endp
 
 recievepowerup proc
 pusha
 
 recieveserial data  
-cmp data,200
-jne recievingends
-recieveserialwait powerupcol 
-recieveserialwait poweruprow
-mov bx,poweruprow
-mov cl,3
-shl bx,cl            ;we need to multiply the poweruprow by 8 to get the actual row on the board
-mov si,powerupcol
-mov board[bx][si],44
-recievingends:
+    cmp data,200
+    jne recievingends
+    recieveserialwait powerupcol 
+    recieveserialwait poweruprow
+    mov bx,poweruprow
+    mov cl,3
+    shl bx,cl            ;we need to multiply the poweruprow by 8 to get the actual row on the board
+    mov si,powerupcol
+    mov board[bx][si],44
+    recievingends:
 
-popa
-ret
+    popa
+    ret
 recievepowerup endp
 
 updatetime proc

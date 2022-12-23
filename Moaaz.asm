@@ -36,7 +36,7 @@ selectedpiece db 0
 kingdead db 0
 waitingtime dw 3
 powerupflag db 0
-startingflag db 1
+startingflag db 0
 ;--------------------------------------------------
 recieveddata dw -1
 ;--------------------------------------------------
@@ -54,7 +54,7 @@ mydeadpieces db 0      ;stores the number of dead pieces of the player, to be re
 poweruprow dw 0
 powerupcol dw 0
 data dw 0
-twohun db 200
+twohun dw 200
 
 board db 8,9,10,11,12,10,9,8
       db 7,7,7,7,7,7,7,7
