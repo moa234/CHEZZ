@@ -1,85 +1,116 @@
 .code
 Displaytime proc   
     pusha
-    MOVECURSOR 40-6,24
-    DisplayNumber currmin
-    DisplayChar ':'
-    DisplayNumber currsec
+    MOVECURSOR 40-6,24      ;move to location of time to diplay
+    DisplayNumber currmin   ;display the minutes
+    DisplayChar ':'         ;display the colon
+    DisplayNumber currsec   ;display the seconds
     popa
     ret
 Displaytime endp
 
 GeneratePowerUp proc 
-;this proc generates a powerup in a random empty box during the game, 
-;if a piece moves to that box it will have less time restriction 2sec instead of 3sec
+    ;this proc generates a powerup in a random empty box during the game, 
+    ;if a piece moves to that box it will have less time restriction 2sec instead of 3sec
 
-;so, first we need to generate a random row and col and check that it is empty (doesn't contain any piece)
+    ;so, first we need to generate a random row and col and check that it is empty (doesn't contain any piece)
+    pusha
+
+    checkifemptybox:
+    rand1:
+    MOV AH, 00h       ; interrupts to get system time        
+    INT 1AH           ; CX:DX now hold number of clock ticks since midnight      
+    mov  ax, dx
+    xor  dx, dx
+    mov  cx, 10    
+    div  cx           ; here dx contains the remainder of the division - from 0 to 9
+    cmp dl,7
+    ja rand1
+    mov dh,0
+    mov bx,dx 
+    
+    rand2:
+    MOV AH, 00h       ; interrupts to get system time        
+    INT 1AH           ; CX:DX now hold number of clock ticks since midnight      
+    mov  ax, dx
+    xor  dx, dx
+    mov  cx, 10    
+    div  cx           ; here dx contains the remainder of the division - from 0 to 9
+    cmp dl,7
+    ja rand2
+    mov dh,0
+    mov si,dx 
+
+    mov ax,bx
+    mov cx,8
+    mul cx
+    mov bx,ax
+    cmp board[bx][si],0   ;here we must check that the random generated position on the board is empty to add the powerup at this position
+    jne checkifemptybox
+    mov bx,38;;;;;;;;;;remove
+    mov si,3;;;;;;;;;;remove
+    mov board[bx][si], 44  ;we are going to define that powerupvalue is = 44, to recognize its place on the board
+    mov cl,3 
+    shr bx,cl              ;we need to store the the poweruprow before *8 to reduce size when sent to other player
+    mov poweruprow,bx
+    mov powerupcol,si
+    popa
+    ret
+GeneratePowerUp endp 
+
+sendPowerup proc
+pusha
+sendserial twohun
+sendserial powerupcol
+sendserial poweruprow
+popa
+ret
+sendPowerup endp
+
+recievepowerup proc
 pusha
 
-checkifemptybox:
-  rand1:
-   MOV AH, 00h       ; interrupts to get system time        
-   INT 1AH           ; CX:DX now hold number of clock ticks since midnight      
-   mov  ax, dx
-   xor  dx, dx
-   mov  cx, 10    
-   div  cx           ; here dx contains the remainder of the division - from 0 to 9
-   cmp dl,7
-   ja rand1
-   mov dh,0
-   mov bx,dx 
-   
-   rand2:
-   MOV AH, 00h       ; interrupts to get system time        
-   INT 1AH           ; CX:DX now hold number of clock ticks since midnight      
-   mov  ax, dx
-   xor  dx, dx
-   mov  cx, 10    
-   div  cx           ; here dx contains the remainder of the division - from 0 to 9
-   cmp dl,7
-   ja rand2
-   mov dh,0
-   mov si,dx 
-
-   mov ax,bx
-   mov cx,8
-   mul cx
-   mov bx,ax
-   cmp board[bx][si],0   ;here we must check that the random generated position on the board is empty to add the powerup at this position
-   jne checkifemptybox
-   mov bx,38;;;;;;;;;;remove
-   mov si,3;;;;;;;;;;remove
-   mov board[bx][si], 44  ;we are going to define that powerupvalue is = 44, to recognize its place on the board
+recieveserial data  
+cmp data,200
+jne recievingends
+recieveserialwait powerupcol 
+recieveserialwait poweruprow
+mov bx,poweruprow
+mov cl,3
+shl bx,cl            ;we need to multiply the poweruprow by 8 to get the actual row on the board
+mov si,powerupcol
+mov board[bx][si],44
+recievingends:
 
 popa
 ret
-GeneratePowerUp endp 
+recievepowerup endp
 
 updatetime proc
     pusha
 
-    getsystemtime
-    cmp dh, startsec
-    jb currsecakbar
+    getsystemtime       ;get the current time
+    cmp dh, startsec    ;compare the current seconds with the start seconds
+    jb currsecas8ar     ;if the current seconds are less than the start seconds, then we need to add 60 to current second
 
-    cmp cl, startmin
-    jb currminakbar
-    jmp incmin
+    cmp cl, startmin    ;compare the current minutes with the start minutes
+    jb currminas8ar     ;if the current minutes are less than the start minutes, then we need to add 60 to current minutes
+    jmp incmin          ;else, increment the minutes
 
-    currminakbar:
-    add cl,60
+    currminas8ar:       
+    add cl,60           ;add 60 to smaller current time to handle a special case
     
     incmin:
-    sub cl,startmin
-    mov currmin,cl
-    jmp incsec
+    sub cl,startmin     ;subtract the start time from the current time
+    mov currmin,cl      ;store the current time in the currmin variable
+    jmp incsec          ;increment the seconds
 
-    currsecakbar:
-    add dh,60
+    currsecas8ar:
+    add dh,60           ;add 60 to smaller current time to handle a special case
 
     incsec:
-    sub dh,startsec
-    mov currsec,dh
+    sub dh,startsec     ;subtract the start time from the current time
+    mov currsec,dh      ;store the current time in the currsec variable
 
     popa
     ret
@@ -87,6 +118,7 @@ updatetime endp
 
 updatepiecestime proc
     pusha
+    ;get position of piece in timer board which is 8*8 word array
     mov bx,row
     mov ax,16
     mul bx
@@ -96,25 +128,34 @@ updatepiecestime proc
     mul si
     mov si,ax
 
+    ;store the current time in the timer board
     mov al,currsec
-    mov ah,currmin
+    mov ah,currmin  
     mov timerboard[bx][si],ax
 
     popa
     ret
 updatepiecestime endp
 
+; sendmove proc
+;     sendserialword row
+;     sendserialword col
+;     sendserialword selectedrow
+;     sendserialword currpos
+; sendmove endp
+
 updaterowandcol proc
     pusha
-
+    ;here we store the pixelrow and pixelcol according to currpos as they are easier to draw with rather than normal row and col
     mov ax, currpos
     mov bx,320
     mov dx,0
     div bx
     mov pixelrow, ax
     mov pixelcol, dx
-
     push dx
+
+    ;here we use pixelrow and pixelcol to get normal row and col to be used in addressing the board, (row is not multiplied with 8, when row will be used to access the board it will be multiplied by 8 first)
     mov dx,0
     mov bx,25
     div bx
@@ -131,61 +172,60 @@ updaterowandcol proc
     ret
 updaterowandcol endp
 
-delnewposhighlight proc
+delnewposhighlight proc        ;this procedure removes only the highlight of the desination box before the piece moves to it
    pusha
-   GetPixelColour pixelcol, pixelrow
-   cmp al,07h
+   GetPixelColour pixelcol, pixelrow        ;we get the main pixel color the destination box   
+   cmp al,07h                               ;check if box color is grey 
    jne boxiswhitee
    call drawboxgrey
    jmp drawingfinished
    boxiswhitee:
    call drawboxwhite
    drawingfinished:
-   call drawborder
+   call drawborder                          ;we need to call drawborder proc to draw the border at the destination box
    popa
    ret
 delnewposhighlight endp
 
-traversecell proc
-    pusha 
-
-    cmp ah, 48h
+traversecell proc                           ;this proc allows us to move between board cells, it is call after a keypress
+    pusha                                   ;the scancode of the keypressed is stored in the register ah
+    cmp ah, 48h                             ;if keypressed is uparrow
     je upkey
-    cmp ah, 4dh
+    cmp ah, 4dh                             ;if keypressed is rightarrow
     je rightkey
-    cmp ah, 4bh
+    cmp ah, 4bh                             ;if keypressed is leftarrow
     je leftkey
-    cmp ah, 50h
+    cmp ah, 50h                             ;if keypressed is down arrow
     je downkey
 
     jmp notarrow
     upkey:
-        cmp row, 0
+        cmp row, 0                          ;check if we are at the top of the board, if yes do nothing
         je notarrow
-        call deleteborder
-        sub currpos,320*25
-        call drawborder
+        call deleteborder                   ;delete border from old cell
+        sub currpos,320*25                  ;update currpos
+        call drawborder                     ;draw the border at the new cell
         jmp notarrow
     rightkey:
-        cmp col, 7
+        cmp col, 7                          ;check if we are at the most right of the board, if yes do nothing
         je notarrow
-        call deleteborder
-        add currpos,25
-        call drawborder
+        call deleteborder                   ;delete border from old cell
+        add currpos,25                      ;update currpos
+        call drawborder                     ;draw the border at the new cell
         jmp notarrow
     leftkey:
-        cmp col, 0 
+        cmp col, 0                          ;check if we are at the most left of the board, if yes do nothing
         je notarrow
-        call deleteborder
-        sub currpos,25
-        call drawborder
+        call deleteborder                   ;delete border from old cell
+        sub currpos,25                      ;update currpos
+        call drawborder                     ;draw the border at the new cell
         jmp notarrow
     downkey:
-        cmp row, 7
+        cmp row, 7                          ;check if we are at the bottom of the board, if yes do nothing
         je notarrow
-        call deleteborder
-        add currpos,320*25
-        call drawborder
+        call deleteborder                   ;delete border from old cell
+        add currpos,320*25                  ;update currpos
+        call drawborder                     ;draw the border at the new cell
         jmp notarrow
         
     notarrow:
@@ -193,48 +233,52 @@ traversecell proc
     ret
 traversecell endp
 
-deleteselctedpiece proc
+deleteselctedpiece proc            ;this proc deletes the piece from an old cell position to be able to move to a new cell
     pusha
-    GetPixelColour selectedpixelcol, selectedpixelrow
+    GetPixelColour selectedpixelcol, selectedpixelrow           ;we need to kmow the box color(grey or white) of the old (selected) cell
     mov di,currpos
-    mov tempcurrpos,di
-    mov di,selectedpos
-    mov currpos,di
-    cmp al,07h
-    jne boxiswhite
+    mov tempcurrpos,di             ;here a temp var is used as proc drawbox uses var currpos and it changes it, while we need to keep the currpos as it is after ret 
+    mov di,selectedpos             
+    mov currpos,di                 ;mov the selected position to the currpos 
+    cmp al,07h                     ;check if the box color is grey
+    jne boxiswhite                 
     call drawboxgrey
     jmp drawisfinished
     boxiswhite:
     call drawboxwhite
     drawisfinished:
-    mov di,tempcurrpos
+    mov di,tempcurrpos             ;change back the currpos to the same currpos that was entering this proc
     mov currpos,di
     popa
     ret
 deleteselctedpiece endp
 
-movefromcelltocell proc
+movefromcelltocell proc            ;this proc is responsible for moving a piece from a cell to another
     pusha
-    mov bx,row
+    mov bx,row                     
     mov ax,8
     mul bx
-    mov bx,ax                 ;bx store row*8
-    mov si,col                ;SI store  col
+    mov bx,ax                      ;bx store row*8 -> to  allow addressing in the board array
+    mov si,col                     ;SI store  col
     
-    cmp movingopflag,1
+    cmp movingopflag,1             ;moving flag indicates whether the piece is selected and is ready to move or not 1->selected-ready to move
     je movingflagon
 
-    cmp board[bx][si],0       ;moving flag =0 and no piece in this square so do nothing
+
+    cmp board[bx][si],0
     jne skipnomovneededrelerror
-    jmp nomovingneeded
-    skipnomovneededrelerror:
+    jmp nomovingneeded              ;moving flag = 0 and no piece in this box so do nothing
+    skipnomovneededrelerror:        ;moving flag = 0 and there is a piece in this box -> we will set moving flag in the upcoming instructions
+
     call checktimeofpiece
-    cmp selectflag,0
-    je nomovingneeded
+    cmp selectflag,0                ;select flag is already set in selection proc, so if no piece selected no moving will be needed
+    jne nomovingneeded_rev
+    jmp nomovingneeded
+    nomovingneeded_rev:
 
     mov di,1
     mov movingopflag,di
-    jmp nomovingneeded        ;we set moving flag as moving flag =0 and there is a piece in this square
+    jmp nomovingneeded        ;we will set moving flag (=1) as moving flag was 0 and there is a piece in this cell
 
     movingflagon:
     mov bx,row
@@ -244,42 +288,48 @@ movefromcelltocell proc
     mov si,col                ;SI store  col
     cmp board[bx][si], 44     ;here we check that if the destination box conatain a powerup or not
     jne nopowerup
-    mov ax,1                  ;remove edit 1 to 2
-    mov waitingtime,ax
+    mov ax,2                  
+    mov waitingtime,ax        ;if powerup is found in destination cell and taken by piece, set the waiting time of this piece's team to be 2sec instead of 3sec
     nopowerup:
-    cmp board[bx][si], 12
-    jne redkingnotdead
+    cmp board[bx][si], 12     ;check if the king is in the destination cell
+    jne kingnotdead
     mov al,1
-    mov redkingdead,al
-    redkingnotdead:
-    cmp board[bx][si],6
-    ja movingneeded
-    cmp board[bx][si],0
+    mov kingdead,al        ;if king is found and move the piece and set kingdead flag to 1
+    kingnotdead:
+    cmp board[bx][si],6       ;enemy pieces values are all above 6, so here we check if destination box has a red piece or blue piece 
+    ja killingapiece
+    cmp board[bx][si],0       ;check if the destination cell is empty
     je movingneeded
-    jmp nomovingneeded
+    jmp nomovingneeded        ;if destination cell is not empty and not an enemy piece, do nothing
+    killingapiece:
+    mov al,1
+    add oponentdeadpieces,al      ;if destination cell has a enemy piece, add 1 to the oponent dead pieces counter
+    
+    movingneeded: 
+    call upgradepawn              ;check if there is a pawn that reached the top of the board and needs to be promoted
 
-    movingneeded:
-    call upgradepawn
+    ;call sendmove
+
     mov al,selectedpiece
-    mov board[bx][si],al
+    mov board[bx][si],al          ;add the value of the selected piece to it's neew location in the 2d array board
     mov dl,01h
-    mov bordercolor,dl
-    call delnewposhighlight
-    call drawSelectedBluePiece
+    mov bordercolor,dl            ;change border color to blue
+    call delnewposhighlight       ;delete highlight of destination cell
+    call drawSelectedPiece    ;draw the moving piece at the destination cell
 
     mov bx,selectedrow
     mov ax,8
     mul bx
-    mov bx,ax  ;bx store row*8
-    mov si,selectedcol
+    mov bx,ax                ;bx store selectedrow*8
+    mov si,selectedcol       ;si store selected col
 
     mov dl,0
     mov board[bx][si],dl
-    call deleteselctedpiece
+    call deleteselctedpiece      ;delete piece from old cell
 
     mov dx,0
-    mov movingopflag,dx
-    mov selectedpiece,dl
+    mov movingopflag,dx          ;reset the movingflag
+    mov selectedpiece,dl         ;empty the value of the moved piece from its old location in the 2d array board
 
     call updatepiecestime
 
@@ -289,7 +339,8 @@ movefromcelltocell proc
 movefromcelltocell endp
 
 checktimeofpiece proc
-
+    
+    ;get index of piece in timerboard by multyping row by 8*2 as it is stored as word then adding column
     mov bx,row
     mov ax,16
     mul bx
@@ -299,27 +350,40 @@ checktimeofpiece proc
     mul si
     mov si,ax
 
-    mov bx, timerboard[bx][si]
-    add bx,waitingtime
-    cmp bh,currmin
-    jne canmove
-    cmp currsec,bl
-    jae canmove
-    jmp cantmove
+    mov bx, timerboard[bx][si]  ;bx store the value of the piece in the timerboard
+
+    cmp bx,-3
+    je canmove                 ;if the value of the piece in the timerboard is -3, it means that the piece did not move before
+
+    add bx,waitingtime          ;add the waiting time of the piece's team to the value of the piece in the timerboard
+
+    cmp bl,60                   ;check if the value of the piece in the timerboard is more than 60 sec
+    jb NotInNextMinute          ;if not, jump to the next instruction
+    sub bl,60                   ;if yes, subtract 60 from the value of the piece in the timerboard and move to next minute
+    inc bh                      ;increment minute
+    NotInNextMinute:
+
+    cmp currmin,bh              ;compare the current minute with the last move of piece + waitingtime
+    jb cantmove                 ;if current minute is less than the last move of piece + waitingtime, the piece can't move
+    ja canmove                  ;if current minute is more than the last move of piece + waitingtime, the piece can move
+
+    cmp currsec,bl              ;else if minutes are equal, compare the current second with the last move of piece + waitingtime
+    jae canmove                 ;piece can move if it is equal or greater
+    jmp cantmove                ;else it cannot move
     canmove:
-        mov selectflag,1
-        jmp endselectmove
+        mov selectflag,1        ;sets selection flag to true as the piece can move so it can be selected
+        jmp endselectmove       
     cantmove:
-        mov selectflag,0
+        mov selectflag,0        ;sets selection flag to false as the piece can't move so it can't be selected
     endselectmove:
     ret
 checktimeofpiece endp
 
-highlightforselectedpiece proc
-    cmp selectflag,0
+highlightforselectedpiece proc     ;this proc see the value of the selected piece to know the type of the piece to be able to call the appropriate highlight procedure
+    cmp selectflag,0               ;if select flag = 0, no piece is selected so do nothing
     jne selecthighlight
     jmp checkhighlight
-    selecthighlight:
+    selecthighlight:               ;jmp to an appropriate higghlight proc according to the selectedpiece value
     cmp selectedpiece,1
     je highpawn
     cmp selectedpiece,6
@@ -333,51 +397,51 @@ highlightforselectedpiece proc
     cmp selectedpiece,2
     je highqueen
         
-    jmp checkhighlight
+    jmp checkhighlight             ;if piece type is none of the prev, do nothing
     highpawn:
         mov dl, 04h
-        mov bordercolor,dl
-        call drawborder
-        mov bordercolor,dl
-        call highlightpawn
+        mov bordercolor,dl         ;set border color to red
+        call drawborder            ;drawborder
+        mov bordercolor,dl         ;border color changes inside drawborder proc and we need to change it to red again
+        call highlightpawn         ;draw highlight suitaable for the pawn moves
         jmp checkhighlight
     highRook:
         mov dl, 04h
-        mov bordercolor,dl
-        call drawborder
-        mov bordercolor,dl
-        call highlightrook
+        mov bordercolor,dl         ;set border color to red
+        call drawborder            ;drawborder
+        mov bordercolor,dl         ;border color changes inside drawborder proc and we need to change it to red again
+        call highlightrook         ;draw highlight suitaable for the hook moves
         jmp checkhighlight
     highbishop:
         mov dl, 04h
-        mov bordercolor,dl
-        call drawborder
-        mov bordercolor,dl
-        call highlightbishop
+        mov bordercolor,dl        ;set border color to red
+        call drawborder           ;drawborder 
+        mov bordercolor,dl        ;border color changes inside drawborder proc and we need to change it to red again
+        call highlightbishop      ;draw highlight suitaable for the bishop moves
         jmp checkhighlight
     highknight:
         mov dl, 04h
-        mov bordercolor,dl
-        call drawborder
-        mov bordercolor,dl
-        call highlightknight
+        mov bordercolor,dl       ;set border color to red
+        call drawborder          ;drawborder
+        mov bordercolor,dl       ;border color changes inside drawborder proc and we need to change it to red again
+        call highlightknight     ;draw highlight suitaable for the knight moves
         jmp checkhighlight
     highking:
         mov dl, 04h
-        mov bordercolor,dl
-        call drawborder
-        mov bordercolor,dl
-        call highlightKing
+        mov bordercolor,dl       ;set border color to red
+        call drawborder          ;drawborder
+        mov bordercolor,dl       ;border color changes inside drawborder proc and we need to change it to red again
+        call highlightKing       ;draw highlight suitaable for the king moves
         jmp checkhighlight
     highqueen:
-        mov dl, 04h
-        mov bordercolor,dl
-        call drawborder
-        mov bordercolor,dl
+        mov dl, 04h              ;set border color to red
+        mov bordercolor,dl       ;drawborder
+        call drawborder          ;border color changes inside drawborder proc and we need to change it to red again
+        mov bordercolor,dl       ;draw highlight suitaable for the queen moves
         call highlightqueen
         
     checkhighlight:
-    cmp highlightflag,1
+    ;cmp highlightflag,1
     ;je gotowhiletrue
     ;mov bl,0
     ;mov movingopflag,0
@@ -403,97 +467,183 @@ upgradepawn proc
     ret
 upgradepawn endp
 
-deletehighlight proc
+drawpiecestimer proc
     pusha
     mov di,currpos
     mov tempcurrpos,di
-    mov currpos,0
-    call updaterowandcol
+    mov currpos,11*320+3
+    
 
-    rows22:
-        mov cx,4
-        row123:
-            call checkboxcolor
-            cmp boxcolor,0ah
-            jne noneedtodeletegreen
-            call drawboxwhite
-            call checkpiece
-            cmp al,0
-            je noneedtodeletegreen
-            call drawSelectedRedPiece
-            noneedtodeletegreen:
-            add currpos,25
-            call updaterowandcol
-
-
-            call checkboxcolor
-            cmp boxcolor,0ah
-            jne noneedtodeletegreen2
-            call drawboxgrey
-            call checkpiece
-            cmp al,0
-            je noneedtodeletegreen2
-            call drawSelectedRedPiece
-            noneedtodeletegreen2:
-            add currpos,25
-            call updaterowandcol
-            
-        loop row123
-
-        mov cx,4
-        add currpos,320*25-25*8
+    checkrow:
         call updaterowandcol
-        row221:
-            call checkboxcolor
-            cmp boxcolor,0ah
-            jne noneedtodeletegreen3
-            call drawboxgrey
-            call checkpiece
-            cmp al,0
-            je noneedtodeletegreen3
-            call drawSelectedRedPiece
-            noneedtodeletegreen3:
-            add currpos,25
-            call updaterowandcol
+        call checktimeofpiece
 
-            call checkboxcolor
-            cmp boxcolor,0ah
-            jne noneedtodeletegreen4
-            call drawboxwhite
-            call checkpiece
-            cmp al,0
-            je noneedtodeletegreen4
-            call drawSelectedRedPiece
-            noneedtodeletegreen4:
-            add currpos,25
-            call updaterowandcol
-        loop row221
+        cmp currmin,bh
+        jb sixtysubcurrsec
+        sub bl,currsec
+        jmp no60sub
+        sixtysubcurrsec:
+        mov cl,60
+        sub cl,currsec
+        add bl,cl
+        no60sub:
 
-        add currpos,320*25-25*8
-        call updaterowandcol
-        cmp currpos,320*25*8
-    jz notrows22
-    jmp rows22
-    notrows22:
+        cmp waitingtime,2
+        je powerupdrawtimer
+        cmp bl,0
+        jne not0
+        call deletetimer
+        not0:
+        cmp selectflag,1
+        je not1powerup
+        cmp bl,3
+        jne not3
+        call draw3
+        jmp not1powerup
+        not3:
+        cmp bl,2
+        jne not2
+        call draw2
+        jmp not1powerup
+        not2:
+        cmp bl,1
+        jne not1
+        call draw1
+        not1:
+        jmp not1powerup
+        
+
+        powerupdrawtimer:
+        cmp bl,0
+        jne not0powerup
+        call deletetimer
+        not0powerup:
+        cmp selectflag,1
+        je not1powerup
+        cmp bl,2
+        jne not2powerup
+        call draw2
+        jmp not1powerup
+        not2powerup:
+        cmp bl,1
+        jne not1powerup
+        call draw1
+        not1powerup:
+
+        cmp col,7
+        jne samerow@timerdraw
+        add currpos,320*25-8*25
+        cmp row,7
+        je lastcell
+        samerow@timerdraw:
+        add currpos,25
+        
+    jmp checkrow
+
+    lastcell:
 
     mov di,tempcurrpos
     mov currpos,di
     call updaterowandcol
-     popa
-     ret
+
+    popa
+    ret
+drawpiecestimer endp
+
+deletehighlight proc      ;this proc removes the highlight of each piece after moving or cancling moving
+    pusha
+    mov di,currpos        ;storing the currpos in a temp var to save it, to return it back before ret
+    mov tempcurrpos,di
+    mov currpos,0
+    call updaterowandcol       ;get the current row and col using the currpos
+
+    rows22:                    ;here we pass on the cells on the board and check it is green to make it white or grey, it depends on the default sequence of the white and grey cells on the board
+        mov cx,4
+        row123:
+            call checkboxcolor           ;check if box color is green
+            cmp boxcolor,0ah
+            jne noneedtodeletegreen
+            call drawboxwhite            ;draw whitebox
+            call checkpiece              
+            cmp al,0                     ;check if there is no piece in the cell
+            je noneedtodeletegreen
+            call drawSelectedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
+            noneedtodeletegreen:
+            add currpos,25               ;update the currpos to goto the next box
+            call updaterowandcol         ;update teh row and col for the new currpos 
+
+ 
+            call checkboxcolor           ;check if box color is green
+            cmp boxcolor,0ah
+            jne noneedtodeletegreen2
+            call drawboxgrey             ;draw greybox
+            call checkpiece
+            cmp al,0                     ;check if there is no piece in the cell
+            je noneedtodeletegreen2
+            call drawSelectedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
+            noneedtodeletegreen2:
+            add currpos,25               ;update the currpos to goto the next box
+            call updaterowandcol         ;update the row and col for the new currpos 
+            
+        loop row123
+
+        mov cx,4
+        add currpos,320*25-25*8          ;move to the next row
+        call updaterowandcol             ;update the row and col for the new currpos 
+        row221:
+            call checkboxcolor           ;check if box color is green
+            cmp boxcolor,0ah
+            jne noneedtodeletegreen3
+            call drawboxgrey             ;draw greybox
+            call checkpiece
+            cmp al,0                     ;check if there is no piece in the cell
+            je noneedtodeletegreen3
+            call drawSelectedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
+            noneedtodeletegreen3:
+            add currpos,25               ;update the currpos to goto the next box
+            call updaterowandcol         ;update the row and col for the new currpos 
+
+            call checkboxcolor           ;check if box color is green
+            cmp boxcolor,0ah    
+            jne noneedtodeletegreen4
+            call drawboxwhite            ;draw whitebox
+            call checkpiece
+            cmp al,0                     ;check if there is no piece in the cell
+            je noneedtodeletegreen4
+            call drawSelectedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
+            noneedtodeletegreen4:
+            add currpos,25               ;update the currpos to goto the next box
+            call updaterowandcol         ;update the row and col for the new currpos
+        loop row221
+
+        add currpos,320*25-25*8          ;move to the next row
+        call updaterowandcol             ;update the row and col for the new currpos
+        cmp currpos,320*25*8             ;check if we finished the cells or not
+    jz notrows22
+    jmp rows22
+    notrows22:
+
+    mov di,tempcurrpos                   ;return back the entering currpos
+    mov currpos,di
+    call updaterowandcol                 ;update the row and col for the new currpos
+    popa
+    ret
 deletehighlight endp
 
 
 highlightpawn proc
     pusha
     
-    mov bx,currpos
-
+    ;sets the highlight position to the cell just above the pawn
+    mov bx,currpos          
     sub bx,320*25
     mov highlightpos,bx
     mov currpos,bx
     call updaterowandcol
 
+    ;then checks for a piece in that cell
+    ;if there is a piece, it will not highlight the cell
+    ;if there is no piece, it will highlight the cell
     call checkpiece
     cmp al,0
     je nopiece
@@ -503,15 +653,20 @@ highlightpawn proc
     nopiece:
     call highlightbox
 
+    ;then it will check if the pawn is in the starting position
     cmp selectedrow,6
     jne pawnstart
 
+    ;if it is in the starting position, it will check the cell 2 cells above it to highlight
     mov bx,currpos
     sub bx,320*25
     mov currpos,bx
     call updaterowandcol
     mov highlightpos,bx
 
+    ;then checks for a piece in that cell
+    ;if there is a piece, it will not highlight the cell
+    ;if there is no piece, it will highlight the cell
     call checkpiece
     cmp al,0
     je nopiece2
@@ -522,17 +677,23 @@ highlightpawn proc
     call highlightbox
     pawnstart:
     
+    ;return the currpos to the original position
     mov ax,selectedpos
     mov currpos,ax
     call updaterowandcol
 
+    ;sets highlight position in the cell to the top right of the pawn
     sub ax,320*25-25
     mov currpos,ax
     call updaterowandcol
+    ;checks if the pawn is in the rightmost column to not highlight the cell
     cmp col,7
     ja notrightpawn
     mov highlightpos,ax
 
+    ;then checks for a piece in that cell
+    ;if there is a piece, it will not highlight the cell
+    ;if there is no piece, it will highlight the cell
     call checkpiece
     cmp al,44
     je notrightpawn
@@ -541,17 +702,23 @@ highlightpawn proc
     jmp notrightpawn
     enemypiece:
     call highlightbox
-    call drawSelectedRedPiece
-    
+    ;if the piece is an enemy piece, it will draw the piece in red
+    call drawSelectedPiece
     notrightpawn:
+
+    ;sets highlight position in the cell to the top left of the pawn
     mov ax,currpos
     sub ax,50
     mov currpos,ax
     call updaterowandcol
+    ;checks if the pawn is in the leftmost column to not highlight the cell
     cmp col,7
     ja endhighpawn
     mov highlightpos,ax
 
+    ;then checks for a piece in that cell
+    ;if there is a piece, it will not highlight the cell
+    ;if there is no piece, it will highlight the cell
     call checkpiece
     cmp al,44
     je endhighpawn
@@ -560,9 +727,11 @@ highlightpawn proc
     jmp endhighpawn
     enemypiece2:
     call highlightbox
-    call drawSelectedRedPiece
+    ;if the piece is an enemy piece, it will draw the piece in red
+    call drawSelectedPiece
     endhighpawn:
 
+    ;return the currpos to the original position
     mov ax,selectedpos
     mov currpos,ax
     call updaterowandcol
@@ -573,16 +742,22 @@ highlightpawn endp
 
 highlightRook proc
     pusha
-
+    ;a loop to check the cells above the rook
     whilenopieceup@Rook:
+        ;check if the rook is in the top row
+        ;if it is, it will not highlight the cells above it
         cmp row,0
         je piecefoundup@rook
+        ;sets the highlight position to the cell above the rook and then the one above it and so on
         mov bx,currpos
         sub bx,320*25
         mov highlightpos,bx
         mov currpos,bx
         call updaterowandcol
         
+        ;then checks for a piece in that cell
+        ;if there is friend a piece, it will not highlight the cell
+        ;if there is an enemy piece, it will highlight the cell and draw the piece in red
         call checkpiece
         cmp al,0
         je highlightup@rook
@@ -593,7 +768,7 @@ highlightRook proc
         jmp piecefoundup@rook
         enemypiecefoundup@rook:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundup@rook
         
         highlightup@rook:
@@ -604,20 +779,24 @@ highlightRook proc
         jmp whilenopieceup@Rook
         piecefoundup@rook:
     
-
+        ;return the currpos to the original position
         mov ax,selectedpos
         mov currpos,ax
         call updaterowandcol
     
     whilenopieceleft@rook:
+        ;check if the rook is in the leftmost column
         cmp col,0
         je piecefoundleft@rook
+        ;sets the highlight position to the cell to the left of the rook and then the one to the left of it and so on
         mov bx,currpos
         sub bx,25
         mov highlightpos,bx
         mov currpos,bx
         call updaterowandcol
-        
+        ;then checks for a piece in that cell
+        ;if there is friend a piece, it will not highlight the cell
+        ;if there is an enemy piece, it will highlight the cell and draw the piece in red
         call checkpiece
         cmp al,0
         je highlightleft@rook
@@ -628,7 +807,7 @@ highlightRook proc
         jmp piecefoundleft@rook
         enemypiecefoundleft@rook:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundleft@rook
         
         highlightleft@rook:
@@ -639,20 +818,26 @@ highlightRook proc
         jmp whilenopieceleft@rook
         piecefoundleft@rook:
     
-
+        ;return the currpos to the original position
         mov ax,selectedpos
         mov currpos,ax
         call updaterowandcol
     
     whilenopiecedown@rook:
+        ;check if the rook is in the bottom row
         cmp row,7
         je piecefounddown@rook
+
+        ;sets the highlight position to the cell below the rook and then the one below it and so on
         mov bx,currpos
         add bx,320*25
         mov highlightpos,bx
         mov currpos,bx
         call updaterowandcol
-        
+
+        ;then checks for a piece in that cell
+        ;if there is friend a piece, it will not highlight the cell
+        ;if there is an enemy piece, it will highlight the cell and draw the piece in red
         call checkpiece
         cmp al,0
         je highlightdown@rook
@@ -663,7 +848,7 @@ highlightRook proc
         jmp piecefounddown@rook
         enemypiecefounddown@rook:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefounddown@rook
         
         highlightdown@rook:
@@ -674,20 +859,27 @@ highlightRook proc
         jmp whilenopiecedown@rook
         piecefounddown@rook:
     
-
+        ;return the currpos to the original position
         mov ax,selectedpos
         mov currpos,ax
         call updaterowandcol
     
     whilenopieceright@rook:
+        ;check if the rook is in the rightmost column
+        ;if it is, it will not highlight the cells to the right of it
         cmp col,7
         je piecefoundright@rook
+
+        ;sets the highlight position to the cell to the right of the rook and then the one to the right of it and so on
         mov bx,currpos
         add bx,25
         mov highlightpos,bx
         mov currpos,bx
         call updaterowandcol
         
+        ;then checks for a piece in that cell
+        ;if there is friend a piece, it will not highlight the cell
+        ;if there is an enemy piece, it will highlight the cell and draw the piece in red
         call checkpiece
         cmp al,0
         je highlightright@rook
@@ -698,7 +890,7 @@ highlightRook proc
         jmp piecefoundright@rook
         enemypiecefoundright@rook:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundright@rook
         
         highlightright@rook:
@@ -709,7 +901,7 @@ highlightRook proc
         jmp whilenopieceright@rook
         piecefoundright@rook:
     
-
+        ;return the currpos to the original position
         mov ax,selectedpos
         mov currpos,ax
         call updaterowandcol
@@ -741,7 +933,7 @@ highlightBishop proc
         jmp piecefoundup@Bishop
         enemypiecefoundup@Bishop:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundup@Bishop
         
         highlightup@Bishop:
@@ -778,7 +970,7 @@ highlightBishop proc
         jmp piecefoundleft@Bishop
         enemypiecefoundleft@Bishop:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundleft@Bishop
         
         highlightleft@Bishop:
@@ -815,7 +1007,7 @@ highlightBishop proc
         jmp piecefounddown@Bishop
         enemypiecefounddown@Bishop:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefounddown@Bishop
         
         highlightdown@Bishop:
@@ -852,7 +1044,7 @@ highlightBishop proc
         jmp piecefoundright@Bishop
         enemypiecefoundright@Bishop:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundright@Bishop
         
         highlightright@Bishop:
@@ -894,7 +1086,7 @@ highlightKing proc
         
         enemypiecefound1@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound1@king
         
         highlight1@king:
@@ -927,7 +1119,7 @@ highlightKing proc
         
         enemypiecefound2@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound2@king
         
         highlight2@king:
@@ -962,7 +1154,7 @@ highlightKing proc
         
         enemypiecefound3@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound3@king
         
         highlight3@king:
@@ -997,7 +1189,7 @@ highlightKing proc
         
         enemypiecefound4@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound4@king
         
         highlight4@king:
@@ -1032,7 +1224,7 @@ highlightKing proc
         
         enemypiecefound5@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound5@king
         
         highlight5@king:
@@ -1068,7 +1260,7 @@ highlightKing proc
         
         enemypiecefound6@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound6@king
         
         highlight6@king:
@@ -1100,7 +1292,7 @@ highlightKing proc
         
         enemypiecefound7@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound7@king
         
         highlight7@king:
@@ -1134,7 +1326,7 @@ highlightKing proc
         
         enemypiecefound8@king:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound8@king
         
         highlight8@king:
@@ -1178,7 +1370,7 @@ highlightknight proc
         
         enemypiecefound2xy1@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound2xy1@Knight
         
         highlight2xy1@Knight:
@@ -1213,7 +1405,7 @@ highlightknight proc
         
         enemypiecefoundneg2xy@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundneg2xy@Knight
         
         highlightneg2xy@Knight:
@@ -1248,7 +1440,7 @@ highlightknight proc
         
         enemypiecefoundneg2xnegy@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundneg2xnegy@Knight
         
         highlightneg2xnegy@Knight:
@@ -1282,7 +1474,7 @@ highlightknight proc
         
         enemypiecefound2xnegy@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefound2xnegy@Knight
         
         highlight2xnegy@Knight:
@@ -1317,7 +1509,7 @@ highlightknight proc
         
         enemypiecefoundnegx2y@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundnegx2y@Knight
         
         highlightnegx2y@Knight:
@@ -1352,7 +1544,7 @@ highlightknight proc
         
         enemypiecefoundx2y@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundx2y@Knight
         
         highlightx2y@Knight:
@@ -1387,7 +1579,7 @@ highlightknight proc
         
         enemypiecefoundxneg2y@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundxneg2y@Knight
         
         highlightxneg2y@Knight:
@@ -1422,7 +1614,7 @@ highlightknight proc
         
         enemypiecefoundnegxneg2y@Knight:
         call highlightbox
-        call drawSelectedRedPiece
+        call drawSelectedPiece
         jmp piecefoundnegxneg2y@Knight
         
         highlightnegxneg2y@Knight:
@@ -1474,9 +1666,11 @@ checkpiece endp
 
 selection proc
     pusha
-
+    ;checks if selected position have a piece that can be moved
     cmp movingopflag,1
     je secondq
+    ;if yes, then it will initialise the variables of selection
+    ;selectedpos, selectedcol, selectedrow, selectedpixelcol, selectedpixelrow, selectedpiece
     mov ax,currpos
     mov selectedpos,ax
     MOV ax,col
@@ -1488,6 +1682,7 @@ selection proc
     mov ax,pixelrow
     mov selectedpixelrow,ax
 
+    ;get the piece from the 2d board array and store it in selectedpiece
     mov bx,row
     mov ax,8
     mul bx

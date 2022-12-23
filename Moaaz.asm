@@ -15,11 +15,15 @@ F2notif db "You sent a game invitation to Ahmed $"
 chatinviteflag db 0
 gameinviteflag db 0
 ;--------------------------------------------------
+myplayer db 16,?,16 dup('$')
+opponentplayer db 16,?,16 dup('$')
+startingplayer db 1
+;--------------------------------------------------
 currpos dw 0
-row dw 0
-col dw 0
-pixelrow dw 0
-pixelcol dw 0
+row dw 0 ;0-7
+col dw 0 ;0-7
+pixelrow dw 0 ;0-200
+pixelcol dw 0 ;0-320
 ;--------------------------------------------------
 selectedpos dw 0
 selectedcol dw 0
@@ -27,9 +31,10 @@ selectedrow dw 0
 selectedpixelcol dw 0
 selectedpixelrow dw 0
 selectedpiece db 0
-redkingdead db 0
-waitingtime dw 4
+kingdead db 0
+waitingtime dw 3
 powerupflag db 0
+startingflag db 1
 ;--------------------------------------------------
 highlightpos dw 0
 highlightflag db 0
@@ -39,7 +44,13 @@ selectflag db 1
 tempcurrpos dw 0
 boxcolor db 0
 bordercolor db 01h
-
+;--------------------------------------------------
+oponentdeadpieces db 0  ;stores the number of dead pieces of the opponent, to be sent to the opponent
+mydeadpieces db 0      ;stores the number of dead pieces of the player, to be recieved from the opponent
+poweruprow dw 0
+powerupcol dw 0
+data dw 0
+twohun db 200
 
 board db 8,9,10,11,12,10,9,8
       db 7,7,7,7,7,7,7,7
@@ -63,17 +74,23 @@ include gameui.inc
 include gamelog.inc
 .code
 main proc far
-    ;set ds
     mov ax,@data
     mov ds,ax
     
-    GraphicsMode
     
     call initializegame
+    initializeserial
     whiletrue:
+
+        cmp startingplayer,1
+        je gotomin
+        jmp checkonplayer0torecieve
+
+        gotomin:   
         cmp currmin,0
         je gotosec
         jmp noneedtogeneratepowerup
+
         gotosec:
         cmp currsec,10
         je gotopowerflag
@@ -84,23 +101,30 @@ main proc far
         mov cl,1
         mov powerupflag,cl
         call GeneratePowerUp
+        call sendPowerup
+
+        checkonplayer0torecieve:
+        cmp startingplayer,0
+        jne noneedtogeneratepowerup
+        call recievepowerup
+
         noneedtogeneratepowerup:
-        cmp redkingdead,1
+        cmp kingdead,1
         jne notendgame
         jmp endgame
+
         notendgame:
         call updatetime
         call Displaytime
-        
+        call drawpiecestimer
         mov selectflag,1
         cmp highlightflag,1
         jne donotchange
-        
         cmp movingopflag,0
         jne donotchange 
         call deletehighlight
+
         donotchange:
-      
         getKeyPress
         jnz whilefalse
         jmp whiletrue
@@ -123,10 +147,9 @@ main proc far
         cmp al,'q'
         je whileq
         jmp whiletrue
-        whileq: 
-
-        call selection
         
+        whileq: 
+        call selection
         cmp movingopflag,1
         jne pass
         call checkboxcolor
@@ -144,7 +167,7 @@ main proc far
     call menu
 
     MOV AH, 4CH
-    MOV AL, 01 ;your return code.
+    MOV AL, 00 ;your return code.
     INT 21H
 main endp
 end main
