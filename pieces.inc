@@ -1,6 +1,7 @@
 .code
-
-drawSelectedRedPiece proc
+drawSelectedPiece proc
+    cmp startingflag,0
+    je drawinverse
     cmp al,7
     je Redpawn
     cmp al,8
@@ -13,6 +14,47 @@ drawSelectedRedPiece proc
     je Redqueen
     cmp al,12
     je Redking
+    cmp al,1
+    je bluepawn
+    cmp al,6
+    je bluerook
+    cmp al,5
+    je blueknight
+    cmp al,4
+    je bluebishop
+    cmp al,2
+    je bluequeen
+    cmp al,3
+    je blueking
+    ret
+
+    drawinverse:
+    cmp al,7
+    je Bluepawn
+    cmp al,8
+    je Bluerook
+    cmp al,9
+    je Blueknight
+    cmp al,10
+    je Bluebishop
+    cmp al,11
+    je Bluequeen
+    cmp al,12
+    je Blueking
+    cmp al,1
+    je Redpawn
+    cmp al,6
+    je Redrook
+    cmp al,5
+    je Redknight
+    cmp al,4
+    je Redbishop
+    cmp al,2
+    je Redqueen
+    cmp al,3
+    je Redking
+    ret
+    
 
     Redpawn:
         call DrawPawnRed
@@ -31,24 +73,7 @@ drawSelectedRedPiece proc
         ret
     Redking:    
         call DrawKingRed
-
-    ret
-drawSelectedRedPiece endp
-
-drawSelectedBluePiece proc
-    cmp al,1
-    je bluepawn
-    cmp al,6
-    je bluerook
-    cmp al,5
-    je blueknight
-    cmp al,4
-    je bluebishop
-    cmp al,2
-    je bluequeen
-    cmp al,3
-    je blueking
-
+        ret
     bluepawn:
         call DrawPawnBlue
         ret
@@ -68,7 +93,7 @@ drawSelectedBluePiece proc
         call DrawKingBlue
 
     ret
-drawSelectedBluePiece endp
+drawSelectedPiece endp
 
 
 DrawRookBlue PROC
