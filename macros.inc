@@ -46,7 +46,7 @@ local registerempty
 
     ;transmits the data
     mov dx,3f8h
-    mov al,data
+    mov ax,data
     out dx,al
     endsendserial:
 endm sendserial
@@ -65,8 +65,26 @@ local nodatarecieved
     continuereceiving:
     mov dx,3f8h
     in al,dx
-    mov recieveddata,al
+    mov ah,0
+    mov recieveddata,ax
     nodatarecieved:
+endm recieveserial
+
+recieveserialwait macro recieveddata
+local waitreceiving
+local nodatarecieved
+
+    ;check if data is recieved
+    waitreceiving:
+    mov dx,3FDH
+    in al , dx 
+    and al,1
+    jz waitreceiving
+    ;recieve data
+    mov dx,3f8h
+    in al,dx
+    mov ah,0
+    mov recieveddata,ax
 endm recieveserial
 
 ;====================CLEARSCREENat=============================================================

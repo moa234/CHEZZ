@@ -25,6 +25,8 @@ col dw 0 ;0-7
 pixelrow dw 0 ;0-200
 pixelcol dw 0 ;0-320
 ;--------------------------------------------------
+enemytemppos dw 0
+;--------------------------------------------------
 selectedpos dw 0
 selectedcol dw 0
 selectedrow dw 0
@@ -35,6 +37,8 @@ redkingdead db 0
 waitingtime dw 3
 powerupflag db 0
 startingflag db 1
+;--------------------------------------------------
+recieveddata dw -1
 ;--------------------------------------------------
 highlightpos dw 0
 highlightflag db 0
@@ -75,6 +79,7 @@ main proc far
     call initializegame
     initializeserial
     whiletrue:
+        call recievedata
         cmp currmin,0
         je gotosec
         jmp noneedtogeneratepowerup
@@ -153,4 +158,139 @@ main proc far
     MOV AL, 00 ;your return code.
     INT 21H
 main endp
+
+recievedata proc
+    
+    recieveserial recieveddata
+    cmp recieveddata,-1
+    jne smthrecieved
+    jmp nothingrecieved
+    smthrecieved:
+    cmp recieveddata,8
+    jb enemymove
+    cmp recieveddata,200
+    jb nopoweruprecieved
+    jmp poweruprecieved
+    nopoweruprecieved:
+    jmp chatrecieved
+
+    enemymove:
+        mov ax,recieveddata
+        mov row,ax
+        recieveserialwait col
+        recieveserialwait selectedrow
+        recieveserialwait selectedcol
+        mov ax,7
+        sub ax,row
+        mov row,ax
+        mov ax,7
+        sub ax,col
+        mov col,ax
+        mov ax,7
+        sub ax,selectedrow
+        mov selectedrow,ax
+        mov ax,7
+        sub ax,selectedcol
+        mov selectedcol,ax
+
+        mov ax,currpos
+        mov enemytemppos,ax
+
+        call updatecurrpos
+        call updateselectedpos
+        call moveenemypiece
+        call updatepiecestime
+
+        mov ax,enemytemppos
+        mov currpos,ax
+        mov recieveddata,-1
+
+    ret
+
+    poweruprecieved:
+
+        mov recieveddata,-1
+    ret
+
+    chatrecieved:
+
+        mov recieveddata,-1
+    ret
+
+    nothingrecieved:
+        mov recieveddata,-1
+    ret
+recievedata endp
+
+moveenemypiece proc
+    mov bx,selectedrow
+    mov ax,8
+    mul bx
+    mov bx,ax                 
+    mov si,selectedcol
+
+    mov cl,board[bx][si]
+    mov board[bx][si],0
+    call deleteselctedpiece
+    
+    mov bx,row
+    mov ax,8
+    mul bx
+    mov bx,ax                 
+    mov si,col
+
+    mov board[bx][si],cl
+    mov al,cl
+    call delnewposhighlight
+    call drawSelectedPiece
+
+    ret
+moveenemypiece endp
+
+updatecurrpos proc
+    pusha
+    mov ax, row
+    mov bx,25
+    mul bx
+    mov pixelrow, ax
+    
+    mov ax, col
+    mov bx,25
+    mul bx
+    mov pixelcol, ax
+
+    mov ax,pixelrow
+    mov bx,320
+    mul bx
+    mov dx,pixelcol
+    add ax,dx
+    mov currpos,ax
+
+    popa
+    ret
+updatecurrpos endp
+
+updateselectedpos proc
+    pusha
+    mov ax, selectedrow
+    mov bx,25
+    mul bx
+    mov selectedpixelrow, ax
+    
+    mov ax, selectedcol
+    mov bx,25
+    mul bx
+    mov selectedpixelcol, ax
+
+    mov ax,selectedpixelrow
+    mov bx,320
+    mul bx
+    mov dx,selectedpixelcol
+    add ax,dx
+    mov selectedpos,ax
+
+    popa
+    ret
+updateselectedpos endp
+
 end main
