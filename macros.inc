@@ -46,7 +46,7 @@ local registerempty
 
     ;transmits the data
     mov dx,3f8h
-    mov al,byte ptr data
+    mov ax,data
     out dx,al
     endsendserial:
 endm sendserial

@@ -137,12 +137,31 @@ updatepiecestime proc
     ret
 updatepiecestime endp
 
-; sendmove proc
-;     sendserialword row
-;     sendserialword col
-;     sendserialword selectedrow
-;     sendserialword currpos
-; sendmove endp
+sendmove proc
+    pusha
+    sendserial row
+    sendserial col
+    sendserial selectedrow
+    sendserial selectedcol
+    POPa
+    ret
+sendmove endp
+
+; recievemove proc
+;     pusha
+;     recieveserial enemyrow
+;     cmp enemyrow,-1
+;     je notamove
+;     recieveserialwait enemycol
+;     recieveserialwait enemyselectedrow
+;     recieveserialwait enemyselectedcol
+;     mov ax,enemyselectedcol
+;     mov waitingtime,ax
+;     notamove:
+;     mov enemyrow,-1
+;     POPa
+;     ret
+; recievemove endp
 
 updaterowandcol proc
     pusha
@@ -182,7 +201,6 @@ delnewposhighlight proc        ;this procedure removes only the highlight of the
    boxiswhitee:
    call drawboxwhite
    drawingfinished:
-   call drawborder                          ;we need to call drawborder proc to draw the border at the destination box
    popa
    ret
 delnewposhighlight endp
@@ -308,13 +326,14 @@ movefromcelltocell proc            ;this proc is responsible for moving a piece 
     movingneeded: 
     call upgradepawn              ;check if there is a pawn that reached the top of the board and needs to be promoted
 
-    ;call sendmove
+    call sendmove
 
     mov al,selectedpiece
     mov board[bx][si],al          ;add the value of the selected piece to it's neew location in the 2d array board
     mov dl,01h
     mov bordercolor,dl            ;change border color to blue
     call delnewposhighlight       ;delete highlight of destination cell
+    call drawborder               ;we need to call drawborder proc to draw the border at the destination box
     call drawSelectedPiece    ;draw the moving piece at the destination cell
 
     mov bx,selectedrow
@@ -1694,12 +1713,3 @@ selection proc
     popa
     ret
 selection endp
-
-getmove proc
-    pusha
-
-    getKeyPress
-    
-    popa
-    ret
-getmove endp
