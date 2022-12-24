@@ -77,7 +77,7 @@ GeneratePowerUp endp
 
 displayopdeadpieces proc
     pusha
-    MOVECURSOR 43-6,18      ;move to location of opponent dead pieces to diplay
+    MOVECURSOR 42-6,3    ;move to location of opponent dead pieces to diplay
     DisplayNumber oponentdeadpieces   ;display opponent dead pieces
     popa
     ret
@@ -85,19 +85,26 @@ displayopdeadpieces endp
 
 displaymydeadpieces proc
     pusha
-    MOVECURSOR 39-6,18      ;move to location of opponent dead pieces to diplay
+    MOVECURSOR 33-6,3    ;move to location of opponent dead pieces to diplay
     DisplayNumber mydeadpieces   ;display opponent dead pieces
     popa
     ret
 displaymydeadpieces endp
 
-sendopdeadpieces proc
-pusha
-sendserial 205
-sendserial oponentdeadpieces
+displaygamenotifbar proc
+pusha  
+
+MOVECURSOR 40-6,1
+DisplayString Score     ;TODO score will be replaced by myplayername and remove the var score from .data
+
+MOVECURSOR 32-6,1
+DisplayString score     ;TODO score will be replaced by oponentname and remove the var score from .data
+
+call displayopdeadpieces
+call displaymydeadpieces
 popa
 ret
-sendopdeadpieces endp
+displaygamenotifbar endp
 
 updatetime proc
     pusha
@@ -198,10 +205,6 @@ recievedata proc
     jne nopoweruprecieved
     jmp poweruprecieved
     nopoweruprecieved:
-    cmp recieveddata,205
-    jne nopiecedeadrecieved
-    jmp mydeadpiecerecieved
-    nopiecedeadrecieved:
     jmp chatrecieved
 
     enemymove:
@@ -248,11 +251,6 @@ recievedata proc
         mov recieveddata,-1
     ret
 
-    mydeadpiecerecieved:
-        recieveserial mydeadpieces
-        call displaymydeadpieces
-         
-    ret
 
     chatrecieved:
 
@@ -280,7 +278,18 @@ moveenemypiece proc
     mul bx
     mov bx,ax                 
     mov si,col
-
+    cmp board[bx][si],0
+    je mypiecenotdead
+    cmp board[bx][si],44
+    je mypiecenotdead
+    mov ax,1
+    add mydeadpieces,1
+    call displaymydeadpieces
+    cmp board[bx][si],3
+    jne mypiecenotdead
+    mov al,1
+    mov mykingdead,al
+    mypiecenotdead:
     mov board[bx][si],cl
     mov al,cl
     call delnewposhighlight
@@ -481,11 +490,10 @@ movefromcelltocell proc            ;this proc is responsible for moving a piece 
     nopowerup:
     cmp board[bx][si], 12     ;check if the king is in the destination cell
     jne kingnotdead
-    mov al,1
-    add oponentdeadpieces,1   ;if king is killed, add 1 to the oponent dead pieces counter
+    mov ax,1
+    add oponentdeadpieces,ax   ;if king is killed, add 1 to the oponent dead pieces counter
     call displayopdeadpieces
-    call sendopdeadpieces
-    mov kingdead,al           ;if king is found and move the piece and set kingdead flag to 1
+    mov opkingdead,al           ;if king is found and move the piece and set kingdead flag to 1
     kingnotdead:
     cmp board[bx][si],6       ;red team pieces values are all above 6, so here we check if destination box has a red piece or blue piece 
     ja killingapiece          ;if destination box has an enemy piece, then we will kill it and add 1 to the oponent dead pieces counter
@@ -498,7 +506,6 @@ movefromcelltocell proc            ;this proc is responsible for moving a piece 
     mov ax,1
     add oponentdeadpieces,ax 
     call displayopdeadpieces
-    call sendopdeadpieces
     movingneeded: 
     call upgradepawn              ;check if there is a pawn that reached the top of the board and needs to be promoted
 

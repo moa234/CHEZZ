@@ -5,6 +5,7 @@ num dw 3456
 mes db 'This is message','$'
 InDATA db 6,?,6 dup('$')
 Innum db 5,?,4 dup('$')
+Score db "Score$"
 ;--------------------------------------------------
 MSG1 db "To start chatting press F1 $"
 MSG2 db "To start the game press F2 $" 
@@ -17,7 +18,7 @@ gameinviteflag db 0
 ;--------------------------------------------------
 myplayer db 16,?,16 dup('$')
 opponentplayer db 16,?,16 dup('$')
-startingplayer db 0
+startingplayer db 1
 ;--------------------------------------------------
 currpos dw 0
 row dw 0 ;0-7
@@ -33,10 +34,11 @@ selectedrow dw 0
 selectedpixelcol dw 0
 selectedpixelrow dw 0
 selectedpiece db 0
-kingdead db 0
+mykingdead db 0
+opkingdead db 0
 waitingtime dw 3
 powerupflag db 0
-startingflag db 1
+startingflag db 0
 ;--------------------------------------------------
 recieveddata dw -1
 ;--------------------------------------------------
@@ -83,8 +85,6 @@ main proc far
     
     
     call initializegame
-    call displayopdeadpieces
-    call displaymydeadpieces
     initializeserial
     whiletrue:
         call recievedata
@@ -106,7 +106,12 @@ main proc far
         call GeneratePowerUp
 
         noneedtogeneratepowerup:
-        cmp kingdead,1
+        cmp mykingdead,1        ;TODO according to who won or lost display you won or you lost
+        jne checkopking
+        jmp endgame
+        
+        checkopking:
+        cmp opkingdead,1
         jne notendgame
         jmp endgame
 

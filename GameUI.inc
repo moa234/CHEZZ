@@ -28,10 +28,7 @@ initializegame proc
     mov startmin, cl
     mov startsec, dh 
 
-    
-
-
-
+    call displaygamenotifbar    
     ret
 initializegame ENDP
 
