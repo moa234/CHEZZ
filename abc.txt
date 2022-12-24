@@ -1,0 +1,12 @@
+
+.code
+
+
+mov ah,6 ; function 6
+ mov al,1 ; scroll by 1 line
+ mov bh,7 ; normal video attribute
+ mov ch,0 ; upper left Y
+ mov cl,0 ; upper left X
+ mov dh,12 ; lower right Y
+ mov dl,79 ; lower right X
+ int 10h 

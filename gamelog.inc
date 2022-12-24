@@ -47,44 +47,34 @@ GeneratePowerUp proc
     mov bx,ax
     cmp board[bx][si],0   ;here we must check that the random generated position on the board is empty to add the powerup at this position
     jne checkifemptybox
-    mov bx,38;;;;;;;;;;remove
-    mov si,3;;;;;;;;;;remove
+    mov bx,40;;;;;;;;;;remove
+    mov si,1;;;;;;;;;;remove
     mov board[bx][si], 44  ;we are going to define that powerupvalue is = 44, to recognize its place on the board
-    mov cl,3 
-    shr bx,cl              ;we need to store the the poweruprow before *8 to reduce size when sent to other player
-    mov poweruprow,bx
-    mov powerupcol,si
+    mov cl,3
+    shr bx,cl              ;here we divide the row by 8 to get the row in the board
+    
+    mov poweruprow,bx      ;store the row of the powerup in the poweruprow variable
+    mov powerupcol,si      ;store the col of the powerup in the powerupcol variable
+    call sendPowerup
+
+    ;mov ax,bx
+    ;mov bx,25
+    ;mul bx
+    ;mov bx,ax
+    ;add bx,7                ;to centralize the cursor in box
+
+    ;mov ax,si
+    ;mov bx,25
+    ;mul bx
+    ;mov si,ax
+    ;add si,7                ;to centralize the cursor in box
+    
+    ;drawboostat 29,129
+   
     popa
     ret
 GeneratePowerUp endp 
 
-sendPowerup proc
-pusha
-sendserial twohun
-sendserial powerupcol
-sendserial poweruprow
-popa
-ret
-sendPowerup endp
-
-recievepowerup proc
-pusha
-
-recieveserial data  
-cmp data,200
-jne recievingends
-recieveserialwait powerupcol 
-recieveserialwait poweruprow
-mov bx,poweruprow
-mov cl,3
-shl bx,cl            ;we need to multiply the poweruprow by 8 to get the actual row on the board
-mov si,powerupcol
-mov board[bx][si],44
-recievingends:
-
-popa
-ret
-recievepowerup endp
 
 updatetime proc
     pusha
@@ -137,12 +127,180 @@ updatepiecestime proc
     ret
 updatepiecestime endp
 
-; sendmove proc
-;     sendserialword row
-;     sendserialword col
-;     sendserialword selectedrow
-;     sendserialword currpos
-; sendmove endp
+sendmove proc
+    pusha
+    sendserial row
+    sendserial col
+    sendserial selectedrow
+    sendserial selectedcol
+    POPa
+    ret
+sendmove endp
+
+; recievemove proc
+;     pusha
+;     recieveserial enemyrow
+;     cmp enemyrow,-1
+;     je notamove
+;     recieveserialwait enemycol
+;     recieveserialwait enemyselectedrow
+;     recieveserialwait enemyselectedcol
+;     mov ax,enemyselectedcol
+;     mov waitingtime,ax
+;     notamove:
+;     mov enemyrow,-1
+;     POPa
+;     ret
+; recievemove endp
+
+sendPowerup proc
+    pusha
+    sendserial 200
+    sendserial powerupcol
+    sendserial poweruprow
+    popa
+    ret
+sendPowerup endp
+
+recievedata proc
+    
+    recieveserial recieveddata
+    cmp recieveddata,-1
+    jne smthrecieved
+    jmp nothingrecieved
+    smthrecieved:
+    cmp recieveddata,8
+    jb enemymove
+    cmp recieveddata,200
+    jb nopoweruprecieved
+    jmp poweruprecieved
+    nopoweruprecieved:
+    jmp chatrecieved
+
+    enemymove:
+        mov ax,recieveddata
+        mov row,ax
+        recieveserialwait col
+        recieveserialwait selectedrow
+        recieveserialwait selectedcol
+        mov ax,7
+        sub ax,row
+        mov row,ax
+        mov ax,7
+        sub ax,col
+        mov col,ax
+        mov ax,7
+        sub ax,selectedrow
+        mov selectedrow,ax
+        mov ax,7
+        sub ax,selectedcol
+        mov selectedcol,ax
+
+        mov ax,currpos
+        mov enemytemppos,ax
+
+        call updatecurrpos
+        call updateselectedpos
+        call moveenemypiece
+        call updatepiecestime
+
+        mov ax,enemytemppos
+        mov currpos,ax
+        mov recieveddata,-1
+
+    ret
+
+    poweruprecieved:
+        recieveserialwait powerupcol 
+        recieveserialwait poweruprow
+        mov bx,poweruprow
+        mov cl,3
+        shl bx,cl            ;we need to multiply the poweruprow by 8 to get the actual row on the board
+        mov si,powerupcol
+        mov board[bx][si],44
+        mov recieveddata,-1
+    ret
+
+    chatrecieved:
+
+        mov recieveddata,-1
+    ret
+
+    nothingrecieved:
+        mov recieveddata,-1
+    ret
+recievedata endp
+
+moveenemypiece proc
+    mov bx,selectedrow
+    mov ax,8
+    mul bx
+    mov bx,ax                 
+    mov si,selectedcol
+
+    mov cl,board[bx][si]
+    mov board[bx][si],0
+    call deleteselctedpiece
+    
+    mov bx,row
+    mov ax,8
+    mul bx
+    mov bx,ax                 
+    mov si,col
+
+    mov board[bx][si],cl
+    mov al,cl
+    call delnewposhighlight
+    call drawSelectedPiece
+
+    ret
+moveenemypiece endp
+
+updatecurrpos proc
+    pusha
+    mov ax, row
+    mov bx,25
+    mul bx
+    mov pixelrow, ax
+    
+    mov ax, col
+    mov bx,25
+    mul bx
+    mov pixelcol, ax
+
+    mov ax,pixelrow
+    mov bx,320
+    mul bx
+    mov dx,pixelcol
+    add ax,dx
+    mov currpos,ax
+
+    popa
+    ret
+updatecurrpos endp
+
+updateselectedpos proc
+    pusha
+    mov ax, selectedrow
+    mov bx,25
+    mul bx
+    mov selectedpixelrow, ax
+    
+    mov ax, selectedcol
+    mov bx,25
+    mul bx
+    mov selectedpixelcol, ax
+
+    mov ax,selectedpixelrow
+    mov bx,320
+    mul bx
+    mov dx,selectedpixelcol
+    add ax,dx
+    mov selectedpos,ax
+
+    popa
+    ret
+updateselectedpos endp
 
 updaterowandcol proc
     pusha
@@ -182,7 +340,6 @@ delnewposhighlight proc        ;this procedure removes only the highlight of the
    boxiswhitee:
    call drawboxwhite
    drawingfinished:
-   call drawborder                          ;we need to call drawborder proc to draw the border at the destination box
    popa
    ret
 delnewposhighlight endp
@@ -290,29 +447,30 @@ movefromcelltocell proc            ;this proc is responsible for moving a piece 
     mov waitingtime,ax        ;if powerup is found in destination cell and taken by piece, set the waiting time of this piece's team to be 2sec instead of 3sec
     nopowerup:
     cmp board[bx][si], 12     ;check if the king is in the destination cell
-    jne kingnotdead
+    jne redkingnotdead
     mov al,1
     mov kingdead,al        ;if king is found and move the piece and set kingdead flag to 1
-    kingnotdead:
-    cmp board[bx][si],6       ;enemy pieces values are all above 6, so here we check if destination box has a red piece or blue piece 
-    ja killingapiece
+    redkingnotdead:
+    cmp board[bx][si],6       ;red team pieces values are all above 6, so here we check if destination box has a red piece or blue piece 
+    ja movingneeded
     cmp board[bx][si],0       ;check if the destination cell is empty
     je movingneeded
-    jmp nomovingneeded        ;if destination cell is not empty and not an enemy piece, do nothing
+    jmp nomovingneeded
     killingapiece:
     mov al,1
-    add oponentdeadpieces,al      ;if destination cell has a enemy piece, add 1 to the oponent dead pieces counter
-    
+    add oponentdeadpieces,al 
+
     movingneeded: 
     call upgradepawn              ;check if there is a pawn that reached the top of the board and needs to be promoted
 
-    ;call sendmove
+    call sendmove
 
     mov al,selectedpiece
     mov board[bx][si],al          ;add the value of the selected piece to it's neew location in the 2d array board
     mov dl,01h
     mov bordercolor,dl            ;change border color to blue
     call delnewposhighlight       ;delete highlight of destination cell
+    call drawborder               ;we need to call drawborder proc to draw the border at the destination box
     call drawSelectedPiece    ;draw the moving piece at the destination cell
 
     mov bx,selectedrow
@@ -565,6 +723,10 @@ deletehighlight proc      ;this proc removes the highlight of each piece after m
             call checkpiece              
             cmp al,0                     ;check if there is no piece in the cell
             je noneedtodeletegreen
+            cmp al,44
+            jne notapowerup
+            ;TODO draw powerupherer
+            notapowerup:
             call drawSelectedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
             noneedtodeletegreen:
             add currpos,25               ;update the currpos to goto the next box
@@ -1692,12 +1854,3 @@ selection proc
     popa
     ret
 selection endp
-
-getmove proc
-    pusha
-
-    getKeyPress
-    
-    popa
-    ret
-getmove endp

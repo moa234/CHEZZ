@@ -17,13 +17,15 @@ gameinviteflag db 0
 ;--------------------------------------------------
 myplayer db 16,?,16 dup('$')
 opponentplayer db 16,?,16 dup('$')
-startingplayer db 1
+startingplayer db 0
 ;--------------------------------------------------
 currpos dw 0
 row dw 0 ;0-7
 col dw 0 ;0-7
 pixelrow dw 0 ;0-200
 pixelcol dw 0 ;0-320
+;--------------------------------------------------
+enemytemppos dw 0
 ;--------------------------------------------------
 selectedpos dw 0
 selectedcol dw 0
@@ -36,6 +38,8 @@ waitingtime dw 3
 powerupflag db 0
 startingflag db 1
 ;--------------------------------------------------
+recieveddata dw -1
+;--------------------------------------------------
 highlightpos dw 0
 highlightflag db 0
 ;--------------------------------------------------
@@ -45,12 +49,12 @@ tempcurrpos dw 0
 boxcolor db 0
 bordercolor db 01h
 ;--------------------------------------------------
+drawX dw 0
+drawY dw 0
 oponentdeadpieces db 0  ;stores the number of dead pieces of the opponent, to be sent to the opponent
 mydeadpieces db 0      ;stores the number of dead pieces of the player, to be recieved from the opponent
 poweruprow dw 0
 powerupcol dw 0
-data dw 0
-twohun db 200
 
 board db 8,9,10,11,12,10,9,8
       db 7,7,7,7,7,7,7,7
@@ -81,33 +85,23 @@ main proc far
     call initializegame
     initializeserial
     whiletrue:
+        call recievedata
 
         cmp startingplayer,1
-        je gotomin
-        jmp checkonplayer0torecieve
-
-        gotomin:   
+        jne noneedtogeneratepowerup
+        
         cmp currmin,0
-        je gotosec
-        jmp noneedtogeneratepowerup
+        jne noneedtogeneratepowerup
 
-        gotosec:
-        cmp currsec,10
-        je gotopowerflag
-        jmp noneedtogeneratepowerup
+        cmp currsec,50
+        jne noneedtogeneratepowerup
 
-        gotopowerflag:
         cmp powerupflag,0
         jne noneedtogeneratepowerup
+
         mov cl,1
         mov powerupflag,cl
         call GeneratePowerUp
-        call sendPowerup
-
-        checkonplayer0torecieve:
-        cmp startingplayer,0
-        jne noneedtogeneratepowerup
-        call recievepowerup
 
         noneedtogeneratepowerup:
         cmp kingdead,1
@@ -171,4 +165,6 @@ main proc far
     MOV AL, 00 ;your return code.
     INT 21H
 main endp
+
+
 end main
