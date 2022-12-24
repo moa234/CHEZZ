@@ -243,9 +243,17 @@ recievedata proc
     poweruprecieved:
         recieveserialwait powerupcol 
         recieveserialwait poweruprow
+        mov ax,7
+        sub ax,poweruprow
+        mov poweruprow,ax
+
+        mov ax,7
+        sub ax,powerupcol
+        mov powerupcol,ax
+
         mov bx,poweruprow
         mov cl,3
-        shl bx,cl            ;we need to multiply the poweruprow by 8 to get the actual row on the board
+        shl bx,cl                ;we need to multiply the poweruprow by 8 to get the actual row on the board
         mov si,powerupcol
         mov board[bx][si],44
         mov recieveddata,-1

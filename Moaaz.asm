@@ -18,7 +18,6 @@ gameinviteflag db 0
 ;--------------------------------------------------
 myplayer db 16,?,16 dup('$')
 opponentplayer db 16,?,16 dup('$')
-startingplayer db 1
 ;--------------------------------------------------
 currpos dw 0
 row dw 0 ;0-7
@@ -89,7 +88,7 @@ main proc far
     whiletrue:
         call recievedata
 
-        cmp startingplayer,1
+        cmp startingflag,1
         jne noneedtogeneratepowerup
         
         cmp currmin,0
