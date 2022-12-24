@@ -51,8 +51,8 @@ bordercolor db 01h
 ;--------------------------------------------------
 drawX dw 0
 drawY dw 0
-oponentdeadpieces db 0  ;stores the number of dead pieces of the opponent, to be sent to the opponent
-mydeadpieces db 0      ;stores the number of dead pieces of the player, to be recieved from the opponent
+oponentdeadpieces dw 0  ;stores the number of dead pieces of the opponent, to be sent to the opponent
+mydeadpieces dw 0       ;stores the number of dead pieces of the player, to be recieved from the opponent
 poweruprow dw 0
 powerupcol dw 0
 
@@ -83,6 +83,8 @@ main proc far
     
     
     call initializegame
+    call displayopdeadpieces
+    call displaymydeadpieces
     initializeserial
     whiletrue:
         call recievedata

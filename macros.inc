@@ -272,21 +272,21 @@ local exit
 local donotzero
 ;displays the number saved in memory variable x max size : 65535
     pusha
-    mov al,number
+    mov al,byte ptr number
     mov ah,0
 
     cmp ax,9
     ja donotzero
     mov dx,'0'
     DisplayCharDX
-    mov al,number
+    mov al,byte ptr number
     mov ah,0
 
     cmp ax,0
     jne donotzero
     mov dx,'0'
     DisplayCharDX
-    mov al,number
+    mov al,byte ptr number
     mov ah,0
 
     donotzero:

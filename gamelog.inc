@@ -69,12 +69,35 @@ GeneratePowerUp proc
     ;mov si,ax
     ;add si,7                ;to centralize the cursor in box
     
-    ;drawboostat 29,129
+    ;Todo: display the powerup in the box
    
     popa
     ret
 GeneratePowerUp endp 
 
+displayopdeadpieces proc
+    pusha
+    MOVECURSOR 43-6,18      ;move to location of opponent dead pieces to diplay
+    DisplayNumber oponentdeadpieces   ;display opponent dead pieces
+    popa
+    ret
+displayopdeadpieces endp
+
+displaymydeadpieces proc
+    pusha
+    MOVECURSOR 39-6,18      ;move to location of opponent dead pieces to diplay
+    DisplayNumber mydeadpieces   ;display opponent dead pieces
+    popa
+    ret
+displaymydeadpieces endp
+
+sendopdeadpieces proc
+pusha
+sendserial 205
+sendserial oponentdeadpieces
+popa
+ret
+sendopdeadpieces endp
 
 updatetime proc
     pusha
@@ -127,7 +150,7 @@ updatepiecestime proc
     ret
 updatepiecestime endp
 
-sendmove proc
+sendmove proc             
     pusha
     sendserial row
     sendserial col
@@ -172,9 +195,13 @@ recievedata proc
     cmp recieveddata,8
     jb enemymove
     cmp recieveddata,200
-    jb nopoweruprecieved
+    jne nopoweruprecieved
     jmp poweruprecieved
     nopoweruprecieved:
+    cmp recieveddata,205
+    jne nopiecedeadrecieved
+    jmp mydeadpiecerecieved
+    nopiecedeadrecieved:
     jmp chatrecieved
 
     enemymove:
@@ -219,6 +246,12 @@ recievedata proc
         mov si,powerupcol
         mov board[bx][si],44
         mov recieveddata,-1
+    ret
+
+    mydeadpiecerecieved:
+        recieveserial mydeadpieces
+        call displaymydeadpieces
+         
     ret
 
     chatrecieved:
@@ -447,19 +480,25 @@ movefromcelltocell proc            ;this proc is responsible for moving a piece 
     mov waitingtime,ax        ;if powerup is found in destination cell and taken by piece, set the waiting time of this piece's team to be 2sec instead of 3sec
     nopowerup:
     cmp board[bx][si], 12     ;check if the king is in the destination cell
-    jne redkingnotdead
+    jne kingnotdead
     mov al,1
-    mov kingdead,al        ;if king is found and move the piece and set kingdead flag to 1
-    redkingnotdead:
+    add oponentdeadpieces,1   ;if king is killed, add 1 to the oponent dead pieces counter
+    call displayopdeadpieces
+    call sendopdeadpieces
+    mov kingdead,al           ;if king is found and move the piece and set kingdead flag to 1
+    kingnotdead:
     cmp board[bx][si],6       ;red team pieces values are all above 6, so here we check if destination box has a red piece or blue piece 
-    ja movingneeded
+    ja killingapiece          ;if destination box has an enemy piece, then we will kill it and add 1 to the oponent dead pieces counter
     cmp board[bx][si],0       ;check if the destination cell is empty
     je movingneeded
     jmp nomovingneeded
     killingapiece:
-    mov al,1
-    add oponentdeadpieces,al 
-
+    cmp board[bx][si],44      ;check if the destination cell has a powerup
+    je movingneeded
+    mov ax,1
+    add oponentdeadpieces,ax 
+    call displayopdeadpieces
+    call sendopdeadpieces
     movingneeded: 
     call upgradepawn              ;check if there is a pawn that reached the top of the board and needs to be promoted
 
@@ -725,7 +764,7 @@ deletehighlight proc      ;this proc removes the highlight of each piece after m
             je noneedtodeletegreen
             cmp al,44
             jne notapowerup
-            ;TODO draw powerupherer
+            ;TODO draw poweruphere
             notapowerup:
             call drawSelectedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
             noneedtodeletegreen:
