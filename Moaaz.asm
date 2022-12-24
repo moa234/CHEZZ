@@ -6,6 +6,10 @@ mes db 'This is message','$'
 InDATA db 6,?,6 dup('$')
 Innum db 5,?,4 dup('$')
 Score db "Score$"
+winingmsg db "You Won $"
+losingmsg db  "You Lost $"
+uquitedmsg db  "You Quited $"
+opquitedmsg db  "Your Opponent Quited $"
 ;--------------------------------------------------
 MSG1 db "To start chatting press F1 $"
 MSG2 db "To start the game press F2 $" 
@@ -38,6 +42,8 @@ opkingdead db 0
 waitingtime dw 3
 powerupflag db 0
 startingflag db 0
+iquited db 0
+opquited db 0
 ;--------------------------------------------------
 recieveddata dw -1
 ;--------------------------------------------------
@@ -132,7 +138,7 @@ main proc far
         whilefalse:
         clearbuffer
         cmp ah,3eh
-        je endgame
+        je iquit
         cmp al,'q'
         je selectcell
         call traversecell
@@ -164,7 +170,45 @@ main proc far
 
     jmp whiletrue
     
+
+    iquit:
+    mov cl,1
+    mov iquited,cl
+
     endgame:
+    cmp mykingdead,1
+    jne youwon
+    ;TODO display myplayer name lost for 4 seconds
+    DisplayString losingmsg
+    jmp gotomenu
+
+    youwon:
+    cmp opkingdead,1
+    jne gamecanceled
+    ;TODO display myplayer name won for 4 seconds
+    DisplayString winingmsg
+    jmp gotomenu
+
+
+    gamecanceled:
+    cmp iquited,1
+    jne otheropquited 
+    ;TODO display myplayer name quited the game for 4 seconds
+    DisplayString uquitedmsg
+    jmp gotomenu
+
+    otheropquited:
+    ;TODO display oponent name quited the game for 4 seconds
+    DisplayString opquitedmsg
+   
+
+    gotomenu:
+    call updatetime
+    mov al,currsec
+    add al,4
+    call updatetime
+    cmp currsec,al
+    jb gotomenu
     call menu
 
     MOV AH, 4CH
