@@ -185,7 +185,7 @@ sendmove endp
 sendopquitflag proc
 pusha
 sendserial 205
-sendserial 1
+;sendserial 1
 popa
 ret
 sendopquitflag endp
@@ -216,6 +216,14 @@ recievedata proc
     jne opnotquited
     jmp turnonopquitflag
     opnotquited:
+    cmp recieveddata,207
+    jne nogameinvitationrecieved
+    jmp turnongameinvitationresponse
+    nogameinvitationrecieved:
+    cmp recieveddata,209
+    jne nochatinvitationrecieved
+    jmp turnonchatinvitationresponse
+    nochatinvitationrecieved:
     jmp chatrecieved
 
     enemymove:
@@ -271,7 +279,21 @@ recievedata proc
     ret
     
     turnonopquitflag:
-        recieveserialwait opquited
+        mov ax,1
+        mov opquited,ax
+        mov recieveddata,-1
+    ret
+
+    turnongameinvitationresponse:
+        mov ax,1
+        mov recievegameresponse,ax
+        mov recieveddata,-1
+    ret
+
+    turnonchatinvitationresponse:
+        mov ax,1
+        mov recievechatresponse,ax
+        mov recieveddata,-1
     ret
 
     chatrecieved:
@@ -1966,3 +1988,144 @@ selection proc
     popa
     ret
 selection endp
+
+sendgameinvitation proc
+pusha
+sendserial 207
+;sendserial 1
+popa
+ret
+sendgameinvitation endp
+
+sendchatinvitation proc
+pusha
+sendserial 209
+;sendserial 1
+popa
+ret
+sendchatinvitation endp
+
+
+game proc 
+    pusha
+    call initializegame
+    initializeserial
+    whiletrue:
+        call recievedata
+
+        cmp opquited,1
+        jne opnotquitedtillnow
+        MOVECURSOR 33-6,6
+        DisplayString opquitedmsg
+        jmp gotomenu
+
+        opnotquitedtillnow:
+
+        cmp startingflag,1
+        jne noneedtogeneratepowerup
+        
+        cmp currmin,0
+        jne noneedtogeneratepowerup
+
+        cmp currsec,50
+        jne noneedtogeneratepowerup
+
+        cmp powerupflag,0
+        jne noneedtogeneratepowerup
+
+        mov cl,1
+        mov powerupflag,cl
+        call GeneratePowerUp
+
+        noneedtogeneratepowerup:
+        cmp mykingdead,1        ;TODO according to who won or lost display you won or you lost
+        jne checkopking
+        MOVECURSOR 35-6,6
+        DisplayString losingmsg
+        jmp gotomenu
+        
+        checkopking:
+        cmp opkingdead,1
+        jne notendgame
+        MOVECURSOR 35-6,6
+        DisplayString winingmsg
+        jmp gotomenu
+
+        notendgame:
+        call updatetime
+        call Displaytime
+        call drawpiecestimer
+        mov selectflag,1
+        cmp highlightflag,1
+        jne donotchange
+        cmp movingopflag,0
+        jne donotchange 
+        call deletehighlight
+
+        donotchange:
+        getKeyPress
+        jnz whilefalse
+        jmp whiletrue
+        whilefalse:
+        clearbuffer
+        cmp ah,3eh
+        jne notquited
+        call sendopquitflag
+        MOVECURSOR 33-6,6
+        DisplayString uquitedmsg
+        jmp gotomenu
+
+        notquited:
+        cmp al,'q'
+        je selectcell
+        call traversecell
+        jmp selectcell
+
+        getout:
+        mov movingopflag,0
+        call deletehighlight
+        mov dl,01h
+        mov bordercolor,dl
+        call drawborder
+        selectcell:
+        cmp al,'q'
+        je whileq
+        jmp whiletrue
+        
+        whileq: 
+        call selection
+        cmp movingopflag,1
+        jne pass
+        call checkboxcolor
+        cmp boxcolor,0ah
+        jne getout
+        pass:
+        
+        call movefromcelltocell
+        call highlightforselectedpiece
+
+
+    jmp whiletrue
+    
+
+   
+    gotomenu:
+    mov al,currsec
+    add al,3
+    cmp al,60                   ;check if the currsec after adding 3 secs is more than 60 sec
+    jb timedelay                ;if not, jump to the next instruction
+    sub al,60                   ;if yes, subtract 60 from the currsec
+    
+    timedelay:
+    call updatetime
+    call Displaytime
+    cmp currsec,al
+    jne timedelay
+    call menu
+
+    ;MOV AH, 4CH
+    ;MOV AL, 00 ;your return code.
+    ;INT 21H
+    popa
+    ret
+game endp

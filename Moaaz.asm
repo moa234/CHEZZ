@@ -17,8 +17,17 @@ MSG3 db "To end the program press ESC $"
 NotifLine db   "________________________________________________________________________________$"
 F1notif db "You sent a chat invitation to Ahmed $"
 F2notif db "You sent a game invitation to Ahmed $"
+F1rec db "You recieved a chat invitation from Ahmed $"
+F2rec db "You recieved a game invitation from Ahmed $"
 chatinviteflag db 0
 gameinviteflag db 0
+invitationflag db 0
+recievechatresponse dw 0
+recievegameresponse dw 0
+repetetionflag1 db 0
+repetetionflag2 db 0
+frommenutogame db 0
+frommenutochat db 0
 ;--------------------------------------------------
 myplayer db 16,?,16 dup('$')
 opponentplayer db 16,?,16 dup('$')
@@ -41,7 +50,7 @@ mykingdead db 0
 opkingdead db 0
 waitingtime dw 3
 powerupflag db 0
-startingflag db 1
+startingflag db 0
 opquited dw 0
 kingrow dw 0
 kingcol dw 0
@@ -83,135 +92,38 @@ startmin db 0
 currsec db 0
 currmin db 0
 
-include menu.inc
+
+
 include macros.inc
 include gameui.inc
 include gamelog.inc
+include menu.inc
+
 .code
+
 main proc far
     mov ax,@data
     mov ds,ax
     
-    
-    call initializegame
-    initializeserial
-    whiletrue:
-        call recievedata
+    ;call menu
 
-        cmp opquited,1
-        jne opnotquitedtillnow
-        MOVECURSOR 33-6,6
-        DisplayString opquitedmsg
-        jmp gotomenu
+    ;cmp frommenutogame,1
+    ;jne donotrungame
+    clearscreen
+    call game
+    ;after ret from game goto menu directly
 
-        opnotquitedtillnow:
-
-        cmp startingflag,1
-        jne noneedtogeneratepowerup
-        
-        cmp currmin,0
-        jne noneedtogeneratepowerup
-
-        cmp currsec,50
-        jne noneedtogeneratepowerup
-
-        cmp powerupflag,0
-        jne noneedtogeneratepowerup
-
-        mov cl,1
-        mov powerupflag,cl
-        call GeneratePowerUp
-
-        noneedtogeneratepowerup:
-        cmp mykingdead,1        ;TODO according to who won or lost display you won or you lost
-        jne checkopking
-        MOVECURSOR 35-6,6
-        DisplayString losingmsg
-        jmp gotomenu
-        
-        checkopking:
-        cmp opkingdead,1
-        jne notendgame
-        MOVECURSOR 35-6,6
-        DisplayString winingmsg
-        jmp gotomenu
-
-        notendgame:
-        call updatetime
-        call Displaytime
-        call drawpiecestimer
-        mov selectflag,1
-        cmp highlightflag,1
-        jne donotchange
-        cmp movingopflag,0
-        jne donotchange 
-        call deletehighlight
-
-        donotchange:
-        getKeyPress
-        jnz whilefalse
-        jmp whiletrue
-        whilefalse:
-        clearbuffer
-        cmp ah,3eh
-        jne notquited
-        call sendopquitflag
-        MOVECURSOR 33-6,6
-        DisplayString uquitedmsg
-        jmp gotomenu
-
-        notquited:
-        cmp al,'q'
-        je selectcell
-        call traversecell
-        jmp selectcell
-
-        getout:
-        mov movingopflag,0
-        call deletehighlight
-        mov dl,01h
-        mov bordercolor,dl
-        call drawborder
-        selectcell:
-        cmp al,'q'
-        je whileq
-        jmp whiletrue
-        
-        whileq: 
-        call selection
-        cmp movingopflag,1
-        jne pass
-        call checkboxcolor
-        cmp boxcolor,0ah
-        jne getout
-        pass:
-        
-        call movefromcelltocell
-        call highlightforselectedpiece
-
-
-    jmp whiletrue
-    
-
-   
-    gotomenu:
-    mov al,currsec
-    add al,3
-    cmp al,60                   ;check if the currsec after adding 3 secs is more than 60 sec
-    jb timedelay                ;if not, jump to the next instruction
-    sub al,60                   ;if yes, subtract 60 from the currsec
-    
-    timedelay:
-    call updatetime
-    call Displaytime
-    cmp currsec,al
-    jne timedelay
-    call menu
+    ;donotrungame:
+    ;cmp frommenutochat,1
+    ;jne donotrunchat
+    ;call chat
+    ;after ret from chat goto menu directly
+    ;donotrunchat:
 
     MOV AH, 4CH
     MOV AL, 00 ;your return code.
     INT 21H
+       
+
 main endp
-
-
 end main
