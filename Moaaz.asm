@@ -8,7 +8,7 @@ Innum db 5,?,4 dup('$')
 Score db "Score$"
 winingmsg db "You Won $"
 losingmsg db  "You Lost $"
-uquitedmsg db  "You Quited $"
+uquitedmsg db  "You  Quited $"
 opquitedmsg db  "Your Opponent Quited $"
 ;--------------------------------------------------
 MSG1 db "To start chatting press F1 $"
@@ -42,7 +42,6 @@ opkingdead db 0
 waitingtime dw 3
 powerupflag db 0
 startingflag db 0
-iquited db 0
 opquited db 0
 ;--------------------------------------------------
 recieveddata dw -1
@@ -113,12 +112,16 @@ main proc far
         noneedtogeneratepowerup:
         cmp mykingdead,1        ;TODO according to who won or lost display you won or you lost
         jne checkopking
-        jmp endgame
+        MOVECURSOR 35-6,6
+        DisplayString losingmsg
+        jmp gotomenu
         
         checkopking:
         cmp opkingdead,1
         jne notendgame
-        jmp endgame
+        MOVECURSOR 35-6,6
+        DisplayString winingmsg
+        jmp gotomenu
 
         notendgame:
         call updatetime
@@ -138,7 +141,12 @@ main proc far
         whilefalse:
         clearbuffer
         cmp ah,3eh
-        je iquit
+        jne notquited
+        MOVECURSOR 33-6,6
+        DisplayString uquitedmsg
+        jmp gotomenu
+
+        notquited:
         cmp al,'q'
         je selectcell
         call traversecell
@@ -171,44 +179,23 @@ main proc far
     jmp whiletrue
     
 
-    iquit:
-    mov cl,1
-    mov iquited,cl
-
-    endgame:
-    cmp mykingdead,1
-    jne youwon
-    ;TODO display myplayer name lost for 4 seconds
-    DisplayString losingmsg
-    jmp gotomenu
-
-    youwon:
-    cmp opkingdead,1
-    jne gamecanceled
-    ;TODO display myplayer name won for 4 seconds
-    DisplayString winingmsg
-    jmp gotomenu
-
-
-    gamecanceled:
-    cmp iquited,1
-    jne otheropquited 
-    ;TODO display myplayer name quited the game for 4 seconds
-    DisplayString uquitedmsg
-    jmp gotomenu
-
-    otheropquited:
-    ;TODO display oponent name quited the game for 4 seconds
-    DisplayString opquitedmsg
+   ; otheropquited:
+   ;TODO display oponent name quited the game for 4 seconds
+   ; MOVECURSOR 33-6,6
+   ; DisplayString opquitedmsg
    
-
     gotomenu:
-    call updatetime
     mov al,currsec
-    add al,4
+    add al,3
+    cmp al,60                   ;check if the currsec after adding 3 secs is more than 60 sec
+    jb timedelay                ;if not, jump to the next instruction
+    sub al,60                   ;if yes, subtract 60 from the currsec
+    
+    timedelay:
     call updatetime
+    call Displaytime
     cmp currsec,al
-    jb gotomenu
+    jne timedelay
     call menu
 
     MOV AH, 4CH

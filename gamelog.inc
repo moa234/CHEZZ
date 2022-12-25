@@ -498,9 +498,10 @@ movefromcelltocell proc            ;this proc is responsible for moving a piece 
     nopowerup:
     cmp board[bx][si], 12     ;check if the king is in the destination cell
     jne kingnotdead
-    mov ax,1
-    add oponentdeadpieces,ax   ;if king is killed, add 1 to the oponent dead pieces counter
-    call displayopdeadpieces
+    ;mov ax,1
+    ;add oponentdeadpieces,ax   ;if king is killed, add 1 to the oponent dead pieces counter
+    ;call displayopdeadpieces
+    mov al,1
     mov opkingdead,al           ;if king is found and move the piece and set kingdead flag to 1
     kingnotdead:
     cmp board[bx][si],6       ;red team pieces values are all above 6, so here we check if destination box has a red piece or blue piece 
