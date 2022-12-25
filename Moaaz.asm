@@ -9,7 +9,7 @@ Score db "Score$"
 winingmsg db "You Won $"
 losingmsg db  "You Lost $"
 uquitedmsg db  "You  Quited $"
-opquitedmsg db  "Your Opponent Quited $"
+opquitedmsg db  "Opponent Quited $"
 ;--------------------------------------------------
 MSG1 db "To start chatting press F1 $"
 MSG2 db "To start the game press F2 $" 
@@ -41,8 +41,13 @@ mykingdead db 0
 opkingdead db 0
 waitingtime dw 3
 powerupflag db 0
-startingflag db 0
-opquited db 0
+startingflag db 1
+opquited dw 0
+kingrow dw 0
+kingcol dw 0
+kingpixelrow dw 0
+kingpixelcol dw 0
+kingpos dw 0
 ;--------------------------------------------------
 recieveddata dw -1
 ;--------------------------------------------------
@@ -93,6 +98,14 @@ main proc far
     whiletrue:
         call recievedata
 
+        cmp opquited,1
+        jne opnotquitedtillnow
+        MOVECURSOR 33-6,6
+        DisplayString opquitedmsg
+        jmp gotomenu
+
+        opnotquitedtillnow:
+
         cmp startingflag,1
         jne noneedtogeneratepowerup
         
@@ -142,6 +155,7 @@ main proc far
         clearbuffer
         cmp ah,3eh
         jne notquited
+        call sendopquitflag
         MOVECURSOR 33-6,6
         DisplayString uquitedmsg
         jmp gotomenu
@@ -179,10 +193,6 @@ main proc far
     jmp whiletrue
     
 
-   ; otheropquited:
-   ;TODO display oponent name quited the game for 4 seconds
-   ; MOVECURSOR 33-6,6
-   ; DisplayString opquitedmsg
    
     gotomenu:
     mov al,currsec

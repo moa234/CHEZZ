@@ -182,6 +182,13 @@ sendmove endp
 ;     POPa
 ;     ret
 ; recievemove endp
+sendopquitflag proc
+pusha
+sendserial 205
+sendserial 1
+popa
+ret
+sendopquitflag endp
 
 sendPowerup proc
     pusha
@@ -205,6 +212,10 @@ recievedata proc
     jne nopoweruprecieved
     jmp poweruprecieved
     nopoweruprecieved:
+    cmp recieveddata,205
+    jne opnotquited
+    jmp turnonopquitflag
+    opnotquited:
     jmp chatrecieved
 
     enemymove:
@@ -258,7 +269,10 @@ recievedata proc
         mov board[bx][si],44
         mov recieveddata,-1
     ret
-
+    
+    turnonopquitflag:
+        recieveserialwait opquited
+    ret
 
     chatrecieved:
 
@@ -305,6 +319,41 @@ moveenemypiece proc
 
     ret
 moveenemypiece endp
+
+checkonking proc
+pusha
+
+
+
+
+
+
+popa
+ret
+checkonking endp
+
+updatekingpos proc
+    pusha
+    mov ax, kingrow
+    mov bx,25
+    mul bx
+    mov kingpixelcol, ax
+    
+    mov ax, kingcol
+    mov bx,25
+    mul bx
+    mov kingpixelcol, ax
+
+    mov ax,kingpixelrow
+    mov bx,320
+    mul bx
+    mov dx,kingpixelcol
+    add ax,dx
+    mov kingpos,ax
+
+    popa
+    ret
+updatekingpos endp
 
 updatecurrpos proc
     pusha
@@ -500,7 +549,7 @@ movefromcelltocell proc            ;this proc is responsible for moving a piece 
     jne kingnotdead
     ;mov ax,1
     ;add oponentdeadpieces,ax   ;if king is killed, add 1 to the oponent dead pieces counter
-    ;call displayopdeadpieces
+    ;call displayopdeadpieces   
     mov al,1
     mov opkingdead,al           ;if king is found and move the piece and set kingdead flag to 1
     kingnotdead:
@@ -522,6 +571,14 @@ movefromcelltocell proc            ;this proc is responsible for moving a piece 
 
     mov al,selectedpiece
     mov board[bx][si],al          ;add the value of the selected piece to it's neew location in the 2d array board
+    cmp board[bx][si],3           ;check if my king has moved
+    jne skipaddingkingrowandcol
+    mov cl,3
+    shr bx,cl
+    mov kingrow,bx
+    mov kingcol,si
+    shl bx,3
+    skipaddingkingrowandcol:
     mov dl,01h
     mov bordercolor,dl            ;change border color to blue
     call delnewposhighlight       ;delete highlight of destination cell
