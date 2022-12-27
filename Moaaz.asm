@@ -5,14 +5,11 @@ num dw 3456
 mes db 'This is message','$'
 InDATA db 6,?,6 dup('$')
 Innum db 5,?,4 dup('$')
-<<<<<<< Updated upstream
-=======
 Score db "Score$"
 winingmsg db "You Won $"
 losingmsg db  "You Lost $"
 uquitedmsg db  "You  Quit $"
 opquitedmsg db  "Opponent Quits $"
->>>>>>> Stashed changes
 ;--------------------------------------------------
 MSG1 db "To start chatting press F1 $"
 MSG2 db "To start the game press F2 $" 
@@ -47,15 +44,12 @@ waitingtime dw 3
 enemyeatenboostflag db 0
 powerupflag db 0
 startingflag db 1
-<<<<<<< Updated upstream
-=======
 opquited dw 0
 kingrow dw 0
 kingcol dw 0
 kingpixelrow dw 0
 kingpixelcol dw 0
 kingpos dw 0
->>>>>>> Stashed changes
 ;--------------------------------------------------
 recieveddata dw -1
 ;--------------------------------------------------
@@ -67,9 +61,6 @@ selectflag db 1
 tempcurrpos dw 0
 boxcolor db 0
 bordercolor db 01h
-<<<<<<< Updated upstream
-
-=======
 ;--------------------------------------------------
 drawX dw 0
 drawY dw 0
@@ -86,7 +77,6 @@ chatendflag db 0
 bufferascii db 0
 bufferscancode db 0
 WelcomeMessage db "Welcome to the chat room!$"
->>>>>>> Stashed changes
 
 board db 8,9,10,11,12,10,9,8
       db 7,7,7,7,7,7,7,7
@@ -115,86 +105,6 @@ main proc far
     mov ax,@data
     mov ds,ax
     
-<<<<<<< Updated upstream
-    
-    call initializegame
-    initializeserial
-    whiletrue:
-        call recievedata
-        cmp currmin,0
-        je gotosec
-        jmp noneedtogeneratepowerup
-
-        gotosec:
-        cmp currsec,10
-        je gotopowerflag
-        jmp noneedtogeneratepowerup
-
-        gotopowerflag:
-        cmp powerupflag,0
-        jne noneedtogeneratepowerup
-        mov cl,1
-        mov powerupflag,cl
-        call GeneratePowerUp
-
-        noneedtogeneratepowerup:
-        cmp redkingdead,1
-        jne notendgame
-        jmp endgame
-
-        notendgame:
-        call updatetime
-        call Displaytime
-        call drawpiecestimer
-        mov selectflag,1
-        cmp highlightflag,1
-        jne donotchange
-        cmp movingopflag,0
-        jne donotchange 
-        call deletehighlight
-
-        donotchange:
-        getKeyPress
-        jnz whilefalse
-        jmp whiletrue
-        whilefalse:
-        clearbuffer
-        cmp ah,3eh
-        je endgame
-        cmp al,'q'
-        je selectcell
-        call traversecell
-        jmp selectcell
-
-        getout:
-        mov movingopflag,0
-        call deletehighlight
-        mov dl,01h
-        mov bordercolor,dl
-        call drawborder
-        selectcell:
-        cmp al,'q'
-        je whileq
-        jmp whiletrue
-        
-        whileq: 
-        call selection
-        cmp movingopflag,1
-        jne pass
-        call checkboxcolor
-        cmp boxcolor,0ah
-        jne getout
-        pass:
-        
-        call movefromcelltocell
-        call highlightforselectedpiece
-
-
-    jmp whiletrue
-    
-    endgame:
-    call menu
-=======
     whileloopistrue:
     ;call menu
 
@@ -216,7 +126,6 @@ main proc far
     ; mov gameinviteflag,0
     ; mov invitationflag,0
     jmp whileloopistrue
->>>>>>> Stashed changes
 
     MOV AH, 4CH
     MOV AL, 00 ;your return code.

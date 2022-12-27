@@ -131,8 +131,6 @@ sendmove endp
 ;     POPa
 ;     ret
 ; recievemove endp
-<<<<<<< Updated upstream
-=======
 sendopquitflag proc
 pusha
 sendserial 205
@@ -395,7 +393,6 @@ updateselectedpos proc
     popa
     ret
 updateselectedpos endp
->>>>>>> Stashed changes
 
 updaterowandcol proc
     pusha
@@ -1984,9 +1981,6 @@ selection proc
     secondq:
     popa
     ret
-<<<<<<< Updated upstream
-selection endp
-=======
 selection endp
 
 sendgameinvitation proc
@@ -2221,4 +2215,3 @@ resetgame proc
 
     ret
 resetgame ENDP
->>>>>>> Stashed changes
