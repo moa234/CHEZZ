@@ -209,7 +209,7 @@ Local back1,back2,back3,back4,back5
     pusha
     mov cx,x
     mov dx,y
-    mov al,0eh
+    mov al,06h
     mov ah,0ch;draw pixel command
     back1:
     int 10h

@@ -154,6 +154,7 @@ initializeMenu proc
     mov recievegameresponse,0
     mov gameinviteflag,0
     mov repetetionflag2,0
+    mov recieveddata,-1
     ret
 initializeMenu ENDP
 

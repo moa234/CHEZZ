@@ -2266,7 +2266,7 @@ resetgame proc
     mov powerupcol,0
     mov poweruprow,0
 
-    mov cx,63
+    mov cx,8*8*2-1
     timerboardloop:
         mov bx,cx
         mov timerboard[bx],-3
