@@ -131,6 +131,271 @@ sendmove endp
 ;     POPa
 ;     ret
 ; recievemove endp
+<<<<<<< Updated upstream
+=======
+sendopquitflag proc
+pusha
+sendserial 205
+;sendserial 1
+popa
+ret
+sendopquitflag endp
+
+sendPowerup proc
+    pusha
+    sendserial 200
+    sendserial powerupcol
+    sendserial poweruprow
+    popa
+    ret
+sendPowerup endp
+
+recievedata proc
+    
+    recieveserial recieveddata
+    cmp recieveddata,-1
+    jne smthrecieved
+    jmp nothingrecieved
+    smthrecieved:
+    cmp recieveddata,8
+    jb enemymove
+    cmp recieveddata,127
+    ja nocharrecieved
+    jmp charrecieved
+    nocharrecieved:
+    cmp recieveddata,200
+    jne nopoweruprecieved
+    jmp poweruprecieved
+    nopoweruprecieved:
+    cmp recieveddata,205
+    jne opnotquited
+    jmp turnonopquitflag
+    opnotquited:
+    cmp recieveddata,207
+    jne nogameinvitationrecieved
+    jmp turnongameinvitationresponse
+    nogameinvitationrecieved:
+    cmp recieveddata,209
+    jne nochatinvitationrecieved
+    jmp turnonchatinvitationresponse
+    nochatinvitationrecieved:
+    jmp chatrecieved
+
+    enemymove:
+        mov ax,recieveddata
+        mov row,ax
+        recieveserialwait col
+        recieveserialwait selectedrow
+        recieveserialwait selectedcol
+        mov ax,7
+        sub ax,row
+        mov row,ax
+        mov ax,7
+        sub ax,col
+        mov col,ax
+        mov ax,7
+        sub ax,selectedrow
+        mov selectedrow,ax
+        mov ax,7
+        sub ax,selectedcol
+        mov selectedcol,ax
+
+        mov ax,currpos
+        mov enemytemppos,ax
+
+        call updatecurrpos
+        call updateselectedpos
+        call moveenemypiece
+        call updatepiecestime
+
+        mov ax,enemytemppos
+        mov currpos,ax
+        mov recieveddata,-1
+
+    ret
+    charrecieved:
+        mov ax,recieveddata
+        mov bufferascii,al
+        call inlinerecievechat
+        mov recieveddata,-1
+    ret
+    poweruprecieved:
+        recieveserialwait powerupcol 
+        recieveserialwait poweruprow
+        mov ax,7
+        sub ax,poweruprow
+        mov poweruprow,ax
+
+        mov ax,7
+        sub ax,powerupcol
+        mov powerupcol,ax
+
+        mov bx,poweruprow
+        mov cl,3
+        shl bx,cl                ;we need to multiply the poweruprow by 8 to get the actual row on the board
+        mov si,powerupcol
+        mov board[bx][si],44
+        mov recieveddata,-1
+    ret
+    
+    turnonopquitflag:
+        mov ax,1
+        mov opquited,ax
+        mov recieveddata,-1
+    ret
+
+    turnongameinvitationresponse:
+        mov ax,1
+        mov recievegameresponse,ax
+        mov recieveddata,-1
+    ret
+
+    turnonchatinvitationresponse:
+        mov ax,1
+        mov recievechatresponse,ax
+        mov recieveddata,-1
+    ret
+
+    chatrecieved:
+
+        mov recieveddata,-1
+    ret
+
+    nothingrecieved:
+        mov recieveddata,-1
+    ret
+recievedata endp
+
+moveenemypiece proc
+    mov bx,selectedrow
+    mov ax,8
+    mul bx
+    mov bx,ax                 
+    mov si,selectedcol
+
+    mov cl,board[bx][si]
+    mov board[bx][si],0
+    call deleteselctedpiece
+    
+    mov bx,row
+    mov ax,8
+    mul bx
+    mov bx,ax                 
+    mov si,col
+    cmp board[bx][si],0
+    je mypiecenotdead
+    cmp board[bx][si],44
+    je enemyeatenboost
+    mov ax,1
+    add mydeadpieces,1
+    call displaymydeadpieces
+    cmp board[bx][si],3
+    jne mypiecenotdead
+    mov al,1
+    mov mykingdead,al
+    jmp mypiecenotdead
+    enemyeatenboost:
+    mov enemyeatenboostflag,1
+    mypiecenotdead:
+    mov board[bx][si],cl
+    mov al,cl
+
+    cmp cl,7
+    jne notEnemyPawnlastrow
+    cmp row,7
+    jne notEnemyPawnlastrow
+    mov board[bx][si],11
+    mov al,11
+    notEnemyPawnlastrow:
+
+    call delnewposhighlight
+
+    call drawSelectedPiece
+
+    ret
+moveenemypiece endp
+
+checkonking proc
+pusha
+
+
+
+
+
+
+popa
+ret
+checkonking endp
+
+updatekingpos proc
+    pusha
+    mov ax, kingrow
+    mov bx,25
+    mul bx
+    mov kingpixelcol, ax
+    
+    mov ax, kingcol
+    mov bx,25
+    mul bx
+    mov kingpixelcol, ax
+
+    mov ax,kingpixelrow
+    mov bx,320
+    mul bx
+    mov dx,kingpixelcol
+    add ax,dx
+    mov kingpos,ax
+
+    popa
+    ret
+updatekingpos endp
+
+updatecurrpos proc
+    pusha
+    mov ax, row
+    mov bx,25
+    mul bx
+    mov pixelrow, ax
+    
+    mov ax, col
+    mov bx,25
+    mul bx
+    mov pixelcol, ax
+
+    mov ax,pixelrow
+    mov bx,320
+    mul bx
+    mov dx,pixelcol
+    add ax,dx
+    mov currpos,ax
+
+    popa
+    ret
+updatecurrpos endp
+
+updateselectedpos proc
+    pusha
+    mov ax, selectedrow
+    mov bx,25
+    mul bx
+    mov selectedpixelrow, ax
+    
+    mov ax, selectedcol
+    mov bx,25
+    mul bx
+    mov selectedpixelcol, ax
+
+    mov ax,selectedpixelrow
+    mov bx,320
+    mul bx
+    mov dx,selectedpixelcol
+    add ax,dx
+    mov selectedpos,ax
+
+    popa
+    ret
+updateselectedpos endp
+>>>>>>> Stashed changes
 
 updaterowandcol proc
     pusha
@@ -337,9 +602,26 @@ checktimeofpiece proc
 
     cmp bx,-3
     je canmove                 ;if the value of the piece in the timerboard is -3, it means that the piece did not move before
-
+    push bx
+    mov bx,row
+    mov ax,8
+    mul bx
+    mov bx,ax                 
+    mov si,col
+    cmp board[bx][si],7
+    pop bx
+    jb mywaitingtime
+    cmp enemyeatenboostflag,1
+    je enemywaitingtime
+    add bx,3
+    jmp checktime
+    mywaitingtime:
     add bx,waitingtime          ;add the waiting time of the piece's team to the value of the piece in the timerboard
+    jmp checktime
+    enemywaitingtime:
+    add bx,2
 
+    checktime:
     cmp bl,60                   ;check if the value of the piece in the timerboard is more than 60 sec
     jb NotInNextMinute          ;if not, jump to the next instruction
     sub bl,60                   ;if yes, subtract 60 from the value of the piece in the timerboard and move to next minute
@@ -459,8 +741,24 @@ drawpiecestimer proc
 
     checkrow:
         call updaterowandcol
-        call checktimeofpiece
 
+        mov bx,row
+        mov ax,8
+        mul bx
+        mov bx,ax                 
+        mov si,col
+        cmp board[bx][si],7
+        jb mypiece
+        cmp enemyeatenboostflag,1
+        je powerupdrawtimer
+        jmp enemynormaldrawtimer
+        mypiece:
+        
+
+        cmp waitingtime,2
+        je powerupdrawtimer
+        enemynormaldrawtimer:
+        call checktimeofpiece
         cmp currmin,bh
         jb sixtysubcurrsec
         sub bl,currsec
@@ -471,8 +769,7 @@ drawpiecestimer proc
         add bl,cl
         no60sub:
 
-        cmp waitingtime,2
-        je powerupdrawtimer
+        
         cmp bl,0
         jne not0
         call deletetimer
@@ -497,6 +794,17 @@ drawpiecestimer proc
         
 
         powerupdrawtimer:
+        call checktimeofpiece
+        cmp currmin,bh
+        jb sixtysubcurrsec@powerup
+        sub bl,currsec
+        jmp no60sub@powerup
+        sixtysubcurrsec@powerup:
+        mov cl,60
+        sub cl,currsec
+        add bl,cl
+        no60sub@powerup:
+
         cmp bl,0
         jne not0powerup
         call deletetimer
@@ -1676,4 +1984,241 @@ selection proc
     secondq:
     popa
     ret
+<<<<<<< Updated upstream
 selection endp
+=======
+selection endp
+
+sendgameinvitation proc
+    pusha
+    sendserial 207
+    ;sendserial 1
+    popa
+    ret
+    sendgameinvitation endp
+
+    sendchatinvitation proc
+    pusha
+    sendserial 209
+    ;sendserial 1
+    popa
+    ret
+sendchatinvitation endp
+
+
+game proc 
+    pusha
+    call initializegame
+    initializeserial
+    call inlinechatinitialize
+    whiletrue:
+        call recievedata
+
+        cmp opquited,1
+        jne opnotquitedtillnow
+        MOVECURSOR 31-6,5
+        DisplayString opquitedmsg
+        jmp gotomenu
+
+        opnotquitedtillnow:
+
+        cmp startingflag,1
+        jne noneedtogeneratepowerup
+        
+        cmp currmin,0
+        jne noneedtogeneratepowerup
+
+        cmp currsec,10
+        jne noneedtogeneratepowerup
+
+        cmp powerupflag,0
+        jne noneedtogeneratepowerup
+
+        mov cl,1
+        mov powerupflag,cl
+        call GeneratePowerUp
+
+        noneedtogeneratepowerup:
+        cmp mykingdead,1        ;TODO according to who won or lost display you won or you lost
+        jne checkopking
+        MOVECURSOR 35-6,5
+        DisplayString losingmsg
+        jmp gotomenu
+        
+        checkopking:
+        cmp opkingdead,1
+        jne notendgame
+        MOVECURSOR 35-6,5
+        DisplayString winingmsg
+        jmp gotomenu
+
+        notendgame:
+        call updatetime
+        call Displaytime
+        call drawpiecestimer
+        mov selectflag,1
+        cmp highlightflag,1
+        jne donotchange
+        cmp movingopflag,0
+        jne donotchange 
+        call deletehighlight
+
+        donotchange:
+        getKeyPress
+        jnz whilefalse
+        jmp whiletrue
+        whilefalse:
+        clearbuffer
+        cmp ah,3eh
+        jne notquited
+        call sendopquitflag
+        MOVECURSOR 33-6,5
+        DisplayString uquitedmsg
+        jmp gotomenu
+
+        notquited:
+        cmp al,9
+        je selectcell
+        cmp al,8h
+        jb notinrangeofchar
+        cmp al,7fh
+        ja notinrangeofchar
+        mov bufferascii,al
+        call inlinesendchat
+        mov bh,0
+        mov bl,bufferascii
+        sendserial bx
+        notinrangeofchar:
+        call traversecell
+        jmp selectcell
+
+        getout:
+        mov movingopflag,0
+        call deletehighlight
+        mov dl,01h
+        mov bordercolor,dl
+        call drawborder
+        selectcell:
+        cmp al,9
+        je whileq
+        jmp whiletrue
+        
+        whileq: 
+        call selection
+        cmp movingopflag,1
+        jne pass
+        call checkboxcolor
+        cmp boxcolor,0ah
+        jne getout
+        pass:
+        
+        call movefromcelltocell
+        call highlightforselectedpiece
+
+
+    jmp whiletrue
+    
+
+   
+    gotomenu:
+    mov al,currsec
+    add al,3
+    cmp al,60                   ;check if the currsec after adding 3 secs is more than 60 sec
+    jb timedelay                ;if not, jump to the next instruction
+    sub al,60                   ;if yes, subtract 60 from the currsec
+    
+    timedelay:
+    call updatetime
+    call Displaytime
+    cmp currsec,al
+    jne timedelay
+    TEXTMODE
+    call resetgame
+    ;MOV AH, 4CH
+    ;MOV AL, 00 ;your return code.
+    ;INT 21H
+    popa
+    ret
+game endp
+
+resetgame proc
+    mov currpos,0
+    mov row,0
+    mov col,0
+    mov pixelrow,0
+    mov pixelcol,0
+    mov enemytemppos,0
+    mov selectedpos,0
+    mov selectedrow,0
+    mov selectedcol,0
+    mov selectedpixelrow,0
+    mov selectedpixelcol,0
+    mov selectedpiece,0
+    mov mykingdead,0
+    mov opkingdead,0
+    mov waitingtime,3
+    mov powerupflag,0
+    mov startingflag,0
+    mov opquited,0
+    mov kingrow,0
+    mov kingcol,0
+    mov kingpixelrow,0
+    mov kingpixelcol,0
+    mov kingpos,0
+    mov recieveddata,0
+    mov highlightpos,0
+    mov highlightflag,0
+    mov movingopflag,0
+    mov selectflag,1
+    mov tempcurrpos,0
+    mov boxcolor,0
+    mov bordercolor,0
+    mov drawX,0
+    mov drawY,0
+    mov oponentdeadpieces,0
+    mov mydeadpieces,0
+    mov powerupcol,0
+    mov poweruprow,0
+
+    mov cx,63
+    timerboardloop:
+        mov bx,cx
+        mov timerboard[bx],-3
+    loop timerboardloop
+
+    mov board[0],8
+    mov board[1],9
+    mov board[2],10
+    mov board[3],11
+    mov board[4],12
+    mov board[5],10
+    mov board[6],9
+    mov board[7],8
+    mov bx,8h
+    enemypawnloop:
+        mov board[bx],7
+        add bx,1
+        cmp bx,16
+    jne enemypawnloop
+    emptyboardloop:
+        mov board[bx],0
+        inc bx
+        cmp bx,48
+    jne emptyboardloop
+    mypawnloop:
+        mov board[bx],1
+        inc bx
+        cmp bx,56
+    jne mypawnloop
+    mov board[56],6
+    mov board[57],5
+    mov board[58],4
+    mov board[59],2
+    mov board[60],3
+    mov board[61],4
+    mov board[62],5
+    mov board[63],6
+
+    ret
+resetgame ENDP
+>>>>>>> Stashed changes

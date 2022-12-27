@@ -5,11 +5,20 @@ num dw 3456
 mes db 'This is message','$'
 InDATA db 6,?,6 dup('$')
 Innum db 5,?,4 dup('$')
+<<<<<<< Updated upstream
+=======
+Score db "Score$"
+winingmsg db "You Won $"
+losingmsg db  "You Lost $"
+uquitedmsg db  "You  Quit $"
+opquitedmsg db  "Opponent Quits $"
+>>>>>>> Stashed changes
 ;--------------------------------------------------
 MSG1 db "To start chatting press F1 $"
 MSG2 db "To start the game press F2 $" 
 MSG3 db "To end the program press ESC $"     
 NotifLine db   "________________________________________________________________________________$"
+inlineNotfline db "_______________$"
 F1notif db "You sent a chat invitation to Ahmed $"
 F2notif db "You sent a game invitation to Ahmed $"
 chatinviteflag db 0
@@ -35,8 +44,18 @@ selectedpixelrow dw 0
 selectedpiece db 0
 redkingdead db 0
 waitingtime dw 3
+enemyeatenboostflag db 0
 powerupflag db 0
 startingflag db 1
+<<<<<<< Updated upstream
+=======
+opquited dw 0
+kingrow dw 0
+kingcol dw 0
+kingpixelrow dw 0
+kingpixelcol dw 0
+kingpos dw 0
+>>>>>>> Stashed changes
 ;--------------------------------------------------
 recieveddata dw -1
 ;--------------------------------------------------
@@ -48,7 +67,26 @@ selectflag db 1
 tempcurrpos dw 0
 boxcolor db 0
 bordercolor db 01h
+<<<<<<< Updated upstream
 
+=======
+;--------------------------------------------------
+drawX dw 0
+drawY dw 0
+oponentdeadpieces dw 0  ;stores the number of dead pieces of the opponent, to be sent to the opponent
+mydeadpieces dw 0       ;stores the number of dead pieces of the player, to be recieved from the opponent
+poweruprow dw 0
+powerupcol dw 0
+;--------------------------------------------------
+player1 db "moaaz$"
+player2 db "marwan$"
+thiscurs dw 0
+thatcurs dw 0
+chatendflag db 0
+bufferascii db 0
+bufferscancode db 0
+WelcomeMessage db "Welcome to the chat room!$"
+>>>>>>> Stashed changes
 
 board db 8,9,10,11,12,10,9,8
       db 7,7,7,7,7,7,7,7
@@ -68,6 +106,8 @@ currmin db 0
 
 include menu.inc
 include macros.inc
+include chat.inc
+include inline.inc
 include gameui.inc
 include gamelog.inc
 .code
@@ -75,6 +115,7 @@ main proc far
     mov ax,@data
     mov ds,ax
     
+<<<<<<< Updated upstream
     
     call initializegame
     initializeserial
@@ -153,6 +194,29 @@ main proc far
     
     endgame:
     call menu
+=======
+    whileloopistrue:
+    ;call menu
+
+    ; cmp frommenutogame,1
+    ; jne donotrungame
+    ; clearscreen
+     call game
+    ; ;after ret from game goto menu directly
+
+    ; donotrungame:
+    ; cmp frommenutochat,1
+    ; jne donotrunchat
+    ; call chat
+    ; mov chatinviteflag,0
+    ; ;after ret from chat goto menu directly
+    ; donotrunchat:
+
+    
+    ; mov gameinviteflag,0
+    ; mov invitationflag,0
+    jmp whileloopistrue
+>>>>>>> Stashed changes
 
     MOV AH, 4CH
     MOV AL, 00 ;your return code.
