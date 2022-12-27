@@ -1,4 +1,4 @@
-        org 100h
+org 100h
 .model small
 .stack 64
 .data
@@ -13,10 +13,7 @@ inputdata db 15 dup('$')
 main proc far
     mov ax,@data
     mov ds,ax 
-    mov bl,maxsize 
-    
-   
-    Y:
+    mov bl,maxsize
     mov dx,offset msg
     mov ah,9
     int 21h;to print msg 
@@ -37,14 +34,6 @@ main proc far
     cmp bl,actsize
     JNG ErrorMessage1 
     loop L 
-    
-    Z:
-    mov ax,0600h
-    mov bh,07
-    mov cx,0
-    mov dx,184FH
-    int 10h;interrupt to clear screen 
-    jmp Y
     
     
     ;to validate the input character
@@ -81,7 +70,7 @@ main proc far
     mov dx,offset msg1
     mov ah,9
     int 21h 
-    jmp Z
+    jmp End
     
     ErrorMessage2: 
     mov ah,2
@@ -90,7 +79,7 @@ main proc far
     mov dx,offset msg2
     mov ah,9
     int 21h 
-    jmp Z
+    jmp End
     
     End:                             
                                  
