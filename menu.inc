@@ -114,6 +114,28 @@ popa
 ret                     
 menu ENDP
     
+initializeMenu proc
+
+    TEXTMODE
+    ;PRINT MAIN SCREEN
+    clearscreen
+    MOVECURSOR 19h, 5h   
+    DisplayString MSG1 
+    GETCURSOR 
+    add dh,4
+    MOVECURSOR 19h, dh 
+    DisplayString MSG2 
+    GETCURSOR 
+    add dh,4
+    MOVECURSOR 19h, dh 
+    DisplayString MSG3      
+    ;PRINT NOTIFICATION BAR LINE
+    MOVECURSOR 0, 14h 
+    DisplayString NotifLine
+    ;GET NOTIFICATION FOR SENDING A CHAT OR GAME INVITATION BY CLICKING F1 OR F2
+    
+    ret
+initializeMenu ENDP
 
 
 

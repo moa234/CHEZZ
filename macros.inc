@@ -103,7 +103,7 @@ ENDM clearscreen
 scrollup MACRO from,to
     pusha
     mov ax,0601h
-    mov bh,07
+    mov bh,00
     mov cx,from
     mov dx,to
     int 10h
@@ -218,6 +218,17 @@ MOVECURSORINCHAT MACRO   pos
 	INT 10H
     popa
 ENDM MOVECURSORINCHAT
+;============================================================================================
+
+;================================MOVECURSORPOSITION=========================================
+MOVECURSORINinline MACRO   pos
+    pusha
+    MOV AH,2
+	MOV BH,0
+	MOV DX,pos
+	INT 10H
+    popa
+ENDM MOVECURSORINinline
 ;============================================================================================
 
 ;=======================================DisplayString========================================

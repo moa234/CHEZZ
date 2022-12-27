@@ -45,7 +45,7 @@ drawboxgrey proc
 drawboxgrey ENDP
 
 drawboard proc
-
+    mov currpos,0
     rows:
         mov cx,4
         row1:

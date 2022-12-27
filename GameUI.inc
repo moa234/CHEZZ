@@ -6,6 +6,10 @@ include board.inc
 
 initializegame proc
     
+    getsystemtime
+    mov startmin, cl
+    mov startsec, dh
+    
     GraphicsMode
 
     cmp startingflag,1
@@ -24,9 +28,7 @@ initializegame proc
     call initializepieces
     mov currpos,320*25*3+25*3
     call drawborder
-    getsystemtime
-    mov startmin, cl
-    mov startsec, dh 
+     
 
     call displaygamenotifbar    
     ret

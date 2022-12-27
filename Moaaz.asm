@@ -15,6 +15,7 @@ MSG1 db "To start chatting press F1 $"
 MSG2 db "To start the game press F2 $" 
 MSG3 db "To end the program press ESC $"     
 NotifLine db   "________________________________________________________________________________$"
+inlineNotfline db "_______________$"
 F1notif db "You sent a chat invitation to Ahmed $"
 F2notif db "You sent a game invitation to Ahmed $"
 F1rec db "You recieved a chat invitation from Ahmed $"
@@ -51,8 +52,9 @@ selectedpiece db 0
 mykingdead db 0
 opkingdead db 0
 waitingtime dw 3
+enemyeatenboostflag db 0
 powerupflag db 0
-startingflag db 0
+startingflag db 1
 opquited dw 0
 kingrow dw 0
 kingcol dw 0
@@ -77,6 +79,15 @@ oponentdeadpieces dw 0  ;stores the number of dead pieces of the opponent, to be
 mydeadpieces dw 0       ;stores the number of dead pieces of the player, to be recieved from the opponent
 poweruprow dw 0
 powerupcol dw 0
+;--------------------------------------------------
+player1 db "moaaz$"
+player2 db "marwan$"
+thiscurs dw 0
+thatcurs dw 0
+chatendflag db 0
+bufferascii db 0
+bufferscancode db 0
+WelcomeMessage db "Welcome to the chat room!$"
 
 board db 8,9,10,11,12,10,9,8
       db 7,7,7,7,7,7,7,7
@@ -97,6 +108,8 @@ currmin db 0
 
 
 include macros.inc
+include chat.inc
+include inline.inc
 include gameui.inc
 include gamelog.inc
 include menu.inc

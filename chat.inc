@@ -1,51 +1,4 @@
-include macros.inc
-.model small
-.286
-.stack 64
-
-.data
-NotifLine db   "________________________________________________________________________________$"
-player1 db "moaaz$"
-player2 db "marwan$"
-thiscurs dw 0
-thatcurs dw 0
-chatendflag db 0
-bufferascii db 0
-bufferscancode db 0
-WelcomeMessage db "Welcome to the chat room!$"
-
 .code
-main proc far
-    mov ax, @data
-    mov ds, ax
-
-    ;------------------------------
-    ;initialze port
-    mov dx,3FbH         
-    mov al,10000000b
-    out dx,al
-
-    mov dx,3f8h
-    mov al,0ch
-    out dx,al
-
-    mov dx,3f9h
-    mov al,00h
-    out dx,al
-
-    ;configuration
-    mov dx,3fbh
-    mov al,00011011b
-    out dx,al
-    ;--------------------------
-
-    call chat
-
-    MOV AH, 4CH
-    MOV AL, 00 ;your return code.
-    INT 21H
-main endp
-
 chat proc
     call chatinitialize
 
@@ -78,7 +31,7 @@ chatinitialize proc
     DisplayString player2
     DisplayChar ":"
     mov thatcurs, 0E06h
-
+    initializeserial
     clearbuffer
     ret
 
@@ -170,6 +123,7 @@ sendchat proc
 
     endchat:
         mov chatendflag,1
+        sendserial 3dh
     ret
 sendchat endp
 
@@ -195,8 +149,9 @@ recievechat proc
     MOVECURSORINCHAT thatcurs
     
     
-    ; cmp bufferscancode,3dh ;f3
-    ; jz endchat@recieve
+    cmp bufferascii,3dh ;f3
+    jz endchat@recieve
+
 
     cmp bufferascii,0dh ;enter
     jz displayenter@recieve
@@ -230,7 +185,3 @@ recievechat proc
         mov chatendflag,1
     ret
 recievechat endp
-
-
-
-end main
