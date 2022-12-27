@@ -70,24 +70,23 @@ local nodatarecieved
     nodatarecieved:
 endm recieveserial
 
-
 recieveserialwait macro recieveddata
 local waitreceiving
+local nodatarecieved
 
-    waitreceiving:
     ;check if data is recieved
+    waitreceiving:
     mov dx,3FDH
     in al , dx 
     and al,1
     jz waitreceiving
-  
     ;recieve data
     mov dx,3f8h
     in al,dx
     mov ah,0
     mov recieveddata,ax
+endm recieveserial
 
-endm recieveserialwait
 ;====================CLEARSCREENat=============================================================
 clearscreentimer MACRO
     pusha
@@ -104,7 +103,7 @@ ENDM clearscreen
 scrollup MACRO from,to
     pusha
     mov ax,0601h
-    mov bh,07
+    mov bh,00
     mov cx,from
     mov dx,to
     int 10h
@@ -221,6 +220,17 @@ MOVECURSORINCHAT MACRO   pos
 ENDM MOVECURSORINCHAT
 ;============================================================================================
 
+;================================MOVECURSORPOSITION=========================================
+MOVECURSORINinline MACRO   pos
+    pusha
+    MOV AH,2
+	MOV BH,0
+	MOV DX,pos
+	INT 10H
+    popa
+ENDM MOVECURSORINinline
+;============================================================================================
+
 ;=======================================DisplayString========================================
 
 DisplayString macro str    ;this macro displays a string when given its memory variable name
@@ -273,21 +283,21 @@ local exit
 local donotzero
 ;displays the number saved in memory variable x max size : 65535
     pusha
-    mov al,number
+    mov al,byte ptr number
     mov ah,0
 
     cmp ax,9
     ja donotzero
     mov dx,'0'
     DisplayCharDX
-    mov al,number
+    mov al,byte ptr number
     mov ah,0
 
     cmp ax,0
     jne donotzero
     mov dx,'0'
     DisplayCharDX
-    mov al,number
+    mov al,byte ptr number
     mov ah,0
 
     donotzero:

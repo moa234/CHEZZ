@@ -1,71 +1,162 @@
 include macros.inc
+
 .code
 
 menu proc
-pusha
-TEXTMODE
-;PRINT MAIN SCREEN
-clearscreen
-MOVECURSOR 19h, 5h   
-DisplayString MSG1 
-GETCURSOR 
-add dh,4
-MOVECURSOR 19h, dh 
-DisplayString MSG2 
-GETCURSOR 
-add dh,4
-MOVECURSOR 19h, dh 
-DisplayString MSG3      
-;PRINT NOTIFICATION BAR LINE
-MOVECURSOR 0, 14h 
-DisplayString NotifLine
-;GET NOTIFICATION FOR SENDING A CHAT OR GAME INVITATION BY CLICKING F1 OR F2
-myloop:
-xor ax, ax 
-int 16h
-cmp al,1bh ; =ESC
-je exit2
-mov bl,1
-cmp chatinviteflag,bl
-je SkipNewChatInvitation  ;dont make a new invitation unless the previous one recieves a response (make flag =0, when a response is recieved)
-cmp ah,3bh ; =F1
-je scroll
-SkipNewChatInvitation:
-mov bl,1
-cmp gameinviteflag,bl
-je SkipNewGameInvitation
+    pusha
+    TEXTMODE
+    ;PRINT MAIN SCREEN
+    clearscreen
+    MOVECURSOR 19h, 5h   
+    DisplayString MSG1 
+    GETCURSOR 
+    add dh,4
+    MOVECURSOR 19h, dh 
+    DisplayString MSG2 
+    GETCURSOR 
+    add dh,4
+    MOVECURSOR 19h, dh 
+    DisplayString MSG3      
+    ;PRINT NOTIFICATION BAR LINE
+    MOVECURSOR 0, 14h 
+    DisplayString NotifLine
+    ;GET NOTIFICATION FOR SENDING A CHAT OR GAME INVITATION BY CLICKING F1 OR F2
+    initializeserial
+    myloop:
+    call recievedata
+    cmp recievechatresponse,1
+    jne nochatresponse
+    cmp chatinviteflag,1
+    jne displayf1rec
+    ;mov al,1
+    ;mov frommenutochat,al
+    call chat
+    call initializeMenu
+    jmp myloop
 
-cmp ah,3ch ; =F2
-je scroll
-SkipNewGameInvitation:
-jmp myloop
-;SCROLL WINDOW DOWN
-scroll:
-scrolldown 1500h,3250h
-;DISPLAY THE NOTIFACTION STRING
-cmp ah,3bh ; =F1
-je printF1notif
-cmp ah,3ch ; =F2
-je printF2notif
-printF1notif:
-MOVECURSOR 1, 15h
-DisplayString F1notif
-mov bl,1
-mov chatinviteflag,bl
-jmp myloop
-printF2notif:
-MOVECURSOR 1, 15h
-DisplayString F2notif
-mov bl,1
-mov gameinviteflag,bl
-jmp myloop
-exit2:
-    
-;SHOULD MAKE A PATH FROM MYLOOP TO THE GAME WHEN THE OTHER USER ACCEPTS THE INVITATION [SIMULATED IN PHASE 1]
-popa
-ret                     
+    displayf1rec:
+    cmp repetetionflag1,0
+    jne nochatresponse
+    scrolldown 1500h,3250h
+    MOVECURSOR 1, 15h
+    DisplayString F1rec                 ;i recieved a chat invitation without sending one
+    DisplayString opponentplayer+2
+    mov al,1
+    add repetetionflag1,1
+
+    nochatresponse:
+    cmp recievegameresponse,1
+    jne nogameresponse
+    cmp gameinviteflag,1
+    jne displayf2rec
+    ;mov al,1
+    ;mov frommenutogame,al
+    call game
+    call initializeMenu
+    jmp myloop
+
+    displayf2rec:
+    cmp repetetionflag2,0
+    jne nogameresponse
+    scrolldown 1500h,3250h
+    MOVECURSOR 1, 15h
+    DisplayString F2rec                 ;i recieved a game invitation without sending one
+    DisplayString opponentplayer+2
+    mov al,1
+    add repetetionflag2,1
+    nogameresponse:
+
+    getKeyPress
+    clearbuffer
+    cmp al,1bh ; =ESC
+    jne donotexitnow
+    jmp exit2
+    donotexitnow:
+    mov bl,1
+    cmp chatinviteflag,bl
+    je skipnewchatinvitation  ;dont make a new invitation unless the previous one recieves a response (make flag =0, when a response is recieved)
+
+    cmp ah,3bh ; =F1
+    jne skipnewchatinvitation
+    mov bl,1
+    mov chatinviteflag,bl
+    call sendchatinvitation
+    jmp printF1notif
+
+    SkipNewChatInvitation:
+    mov bl,1
+    cmp gameinviteflag,bl
+    je skipnewinvitation  
+    cmp ah,3ch ; =F2
+    jne SkipNewInvitation
+    mov bl,1
+    mov gameinviteflag,bl
+
+    call sendgameinvitation
+    jmp printF2notif
+
+    SkipNewInvitation:
+    jmp myloop
+
+    ;DISPLAY THE NOTIFACTION STRING
+    printF1notif:
+    scrolldown 1500h,3250h
+    MOVECURSOR 1, 15h
+    DisplayString F1notif
+    DisplayString opponentplayer+2
+    jmp myloop
+
+    printF2notif:
+    scrolldown 1500h,3250h
+    MOVECURSOR 1, 15h
+    DisplayString F2notif
+    DisplayString opponentplayer+2
+    cmp recievegameresponse,1
+    jne didnotstart
+    mov startingflag,0
+    didnotstart:
+    jmp myloop
+    exit2:
+
+    clearscreen
+    MOVECURSOR 0,0
+    MOV AH, 4CH
+    MOV AL, 00    ;your return code.
+    INT 21H
+
+    popa
+    ret                     
 menu ENDP
     
+initializeMenu proc
+
+    TEXTMODE
+    initializeserial
+    ;PRINT MAIN SCREEN
+    clearscreen
+    MOVECURSOR 19h, 5h   
+    DisplayString MSG1 
+    GETCURSOR 
+    add dh,4
+    MOVECURSOR 19h, dh 
+    DisplayString MSG2 
+    GETCURSOR 
+    add dh,4
+    MOVECURSOR 19h, dh 
+    DisplayString MSG3     
+    ;PRINT NOTIFICATION BAR LINE
+    MOVECURSOR 0, 14h 
+    DisplayString NotifLine
+    ;GET NOTIFICATION FOR SENDING A CHAT OR GAME INVITATION BY CLICKING F1 OR F2
+    mov recievechatresponse,0
+    mov chatinviteflag,0
+    mov repetetionflag1,0
+    mov recievegameresponse,0
+    mov gameinviteflag,0
+    mov repetetionflag2,0
+    mov recieveddata,-1
+    ret
+initializeMenu ENDP
 
 
 

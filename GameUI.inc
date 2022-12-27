@@ -6,6 +6,10 @@ include board.inc
 
 initializegame proc
     
+    getsystemtime
+    mov startmin, cl
+    mov startsec, dh
+    
     GraphicsMode
 
     cmp startingflag,1
@@ -24,14 +28,9 @@ initializegame proc
     call initializepieces
     mov currpos,320*25*3+25*3
     call drawborder
-    getsystemtime
-    mov startmin, cl
-    mov startsec, dh 
+     
 
-    
-
-
-
+    call displaygamenotifbar    
     ret
 initializegame ENDP
 
@@ -204,3 +203,65 @@ deletetimer proc
     popa
     ret
 deletetimer ENDP
+
+drawboostat MACRO x,y 
+Local back1,back2,back3,back4,back5
+    pusha
+    mov di,7
+    add x,di
+    add y,di
+    mov cx,x
+    mov dx,y
+    mov al,06h
+    mov ah,0ch;draw pixel command
+    back1:
+    int 10h
+    inc cx
+    inc dx
+    mov si,12
+    add si,x
+    cmp cx,si
+    jnz back1;to draw the 1st diagonal line from top left to bottom rigth
+    dec cx
+    back2:
+    int 10h
+    dec cx
+    cmp cx,x
+    jne back2;to draw the lower horizontal line  
+    inc cx
+    dec dx
+    back3:
+    int 10h
+    inc cx
+    dec dx
+    mov si,12
+    add si,x
+    cmp cx,si
+    jnz back3;to draw 2nd diagonal line from bottom left to top right
+    dec cx
+    back4:
+    int 10h
+    dec cx
+    mov si,1
+    add si,x
+    cmp cx,si
+    jge back4;to draw the upper horizontal line 
+    
+    mov si,6
+    add si,x
+    cmp cx,si
+    mov si,6
+    add si,y
+    ;cmp dx,si
+    add cx,6
+    back5:
+    int 10h
+    inc dx
+    inc dx
+    inc dx 
+    mov si,12
+    add si,y
+    cmp dx,si
+    jle back5;to draw the dotted line
+    popa
+ENDM drawboostat
