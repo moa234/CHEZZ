@@ -58,33 +58,33 @@ username proc
     inc si       
     inc dl                
 
-cmp dl,myplayer[1] 
-je exit222                 
-jmp check               
-exit222:
+    cmp dl,myplayer[1] 
+    je exit222                 
+    jmp check               
+    exit222:
 
-call send&recusernames
+    call send&recusernames
 
-popa
-ret
-username endp
+    popa
+    ret
+    username endp
 
-send&recusernames proc
-pusha
+    send&recusernames proc
+    pusha
 
-mov cx,15
-mov si,0
-userloop:
-mov bh,0
-mov bl,myplayer[Si]
-sendserial bx
-recieveserialwait bx
-mov opponentplayer[si],bl
-inc si
-loop userloop
+    mov cx,15
+    mov si,0
+    userloop:
+    mov bh,0
+    mov bl,myplayer[Si]
+    sendserial bx
+    recieveserialwait bx
+    mov opponentplayer[si],bl
+    inc si
+    loop userloop
 
-popa
-ret
+    popa
+    ret
 send&recusernames endp
 
 

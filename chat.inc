@@ -15,7 +15,6 @@ chat endp
 
 chatinitialize proc
 
-    TEXTMODE
     SelectVideoPage 2
     clearscreen
 
@@ -23,12 +22,12 @@ chatinitialize proc
     DisplayString NotifLine
 
     MOVECURSORINCHAT 0001h
-    DisplayString player1
+    DisplayString myplayer+2
     DisplayChar ":"
     mov thiscurs, 0106h
 
     MOVECURSORINCHAT 0D01h
-    DisplayString player2
+    DisplayString opponentplayer+2
     DisplayChar ":"
     mov thatcurs, 0E06h
     initializeserial

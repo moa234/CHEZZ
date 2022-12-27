@@ -5,12 +5,12 @@ inlinechatinitialize proc
     DisplayString inlineNotfline
 
     MOVECURSORINinline 0619h
-    DisplayString player1
+    DisplayString myplayer+2
     DisplayChar ":"
     mov thiscurs, 0719h
 
     MOVECURSORINinline 0f19h
-    DisplayString player2
+    DisplayString opponentplayer+2
     DisplayChar ":"
     mov thatcurs, 1019h
     clearbuffer

@@ -57,20 +57,20 @@ GeneratePowerUp proc
     mov powerupcol,si      ;store the col of the powerup in the powerupcol variable
     call sendPowerup
 
-    ;mov ax,bx
-    ;mov bx,25
-    ;mul bx
-    ;mov bx,ax
-    ;add bx,7                ;to centralize the cursor in box
+    mov ax,bx
+    mov bx,25
+    mul bx
+    add ax,7
+    mov poweruprow,ax               ;to centralize the cursor in box
 
-    ;mov ax,si
-    ;mov bx,25
-    ;mul bx
-    ;mov si,ax
-    ;add si,7                ;to centralize the cursor in box
+    mov ax,si
+    mov cx,25
+    mul cx
+    add ax,7
+    mov powerupcol,ax                ;to centralize the cursor in box
     
     ;Todo: display the powerup in the box
-   
+    drawboostat powerupcol,poweruprow
     popa
     ret
 GeneratePowerUp endp 
@@ -95,10 +95,10 @@ displaygamenotifbar proc
 pusha  
 
 MOVECURSOR 40-6,1
-DisplayString Score     ;TODO score will be replaced by myplayername and remove the var score from .data
+DisplayString myplayer+2     ;TODO score will be replaced by myplayername and remove the var score from .data
 
 MOVECURSOR 32-6,1
-DisplayString score     ;TODO score will be replaced by oponentname and remove the var score from .data
+DisplayString opponentplayer+2     ;TODO score will be replaced by oponentname and remove the var score from .data
 
 call displayopdeadpieces
 call displaymydeadpieces
@@ -284,6 +284,22 @@ recievedata proc
         shl bx,cl                ;we need to multiply the poweruprow by 8 to get the actual row on the board
         mov si,powerupcol
         mov board[bx][si],44
+        
+        mov ax,poweruprow
+        mov bx,25
+        mul bx
+        add ax,7
+        mov poweruprow,ax               ;to centralize the cursor in box
+
+        mov ax,powerupcol
+        mov cx,25
+        mul cx
+        add ax,7
+        mov powerupcol,ax                ;to centralize the cursor in box
+        
+        ;Todo: display the powerup in the box
+        drawboostat powerupcol,poweruprow
+
         mov recieveddata,-1
     ret
     
@@ -925,6 +941,8 @@ deletehighlight proc      ;this proc removes the highlight of each piece after m
             cmp al,44
             jne notapowerup
             ;TODO draw poweruphere
+            drawboostat pixelcol,pixelrow
+            jmp noneedtodeletegreen
             notapowerup:
             call drawSelectedPiece    ;if there is piece in the box we need to redraw it after drawing the white/grey box
             noneedtodeletegreen:
@@ -944,7 +962,10 @@ deletehighlight proc      ;this proc removes the highlight of each piece after m
             add currpos,25               ;update the currpos to goto the next box
             call updaterowandcol         ;update the row and col for the new currpos 
             
-        loop row123
+        dec cx
+        jz row12345
+        jmp row123
+        row12345:
 
         mov cx,4
         add currpos,320*25-25*8          ;move to the next row

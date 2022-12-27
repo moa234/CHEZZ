@@ -16,10 +16,10 @@ MSG2 db "To start the game press F2 $"
 MSG3 db "To end the program press ESC $"     
 NotifLine db   "________________________________________________________________________________$"
 inlineNotfline db "_______________$"
-F1notif db "You sent a chat invitation to Ahmed $"
-F2notif db "You sent a game invitation to Ahmed $"
-F1rec db "You recieved a chat invitation from Ahmed $"
-F2rec db "You recieved a game invitation from Ahmed $"
+F1notif db "You sent a chat invitation to $"
+F2notif db "You sent a game invitation to $"
+F1rec db "You recieved a chat invitation from $"
+F2rec db "You recieved a game invitation from $"
 chatinviteflag db 0
 gameinviteflag db 0
 invitationflag db 0
@@ -105,15 +105,17 @@ startmin db 0
 currsec db 0
 currmin db 0
 
+ro dw 130
+co dw 32
 
 
 include macros.inc
+include users.inc
 include chat.inc
 include inline.inc
 include gameui.inc
 include gamelog.inc
 include menu.inc
-include users.inc
 
 .code
 
@@ -121,20 +123,12 @@ main proc far
     mov ax,@data
     mov ds,ax
     
-    ;call menu
     call username
-    ;cmp frommenutogame,1
-    ;jne donotrungame
-    ;clearscreen
-    ;call game
-    ;after ret from game goto menu directly
-
-    ;donotrungame:
-    ;cmp frommenutochat,1
-    ;jne donotrunchat
-    ;call chat
-    ;after ret from chat goto menu directly
-    ;donotrunchat:
+    call menu
+    ;graphicsmode
+    ;mov bx,32
+    ;mov si,130
+    ;drawboostat ro,co
 
     MOV AH, 4CH
     MOV AL, 00 ;your return code.

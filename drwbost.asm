@@ -1,6 +1,3 @@
-.Model SMALL
-.STACK 64
-.Data 
 .code
 drawboostat MACRO x,y 
     mov cx,x
@@ -11,7 +8,9 @@ drawboostat MACRO x,y
     int 10h
     inc cx
     inc dx
-    cmp cx,x+10
+    mov di,10
+    add di,x
+    cmp cx,di
     jnz back1;to draw the 1st diagonal line from top left to bottom rigth
     dec cx
     back2:
@@ -25,40 +24,33 @@ drawboostat MACRO x,y
     int 10h
     inc cx
     dec dx
-    cmp cx,x+10
+    mov di,10
+    add di,x
+    cmp cx,di
     jnz back3;to draw 2nd diagonal line from bottom left to top right
     dec cx
     back4:
     int 10h
     dec cx
-    cmp cx,x+1
+    mov di,1
+    add di,x
+    cmp cx,di
     jge back4;to draw the upper horizontal line 
     
-    mov cx,x+5
-    mov dx,y+5
+    mov di,5
+    add di,x
+    cmp cx,di
+    mov di,5
+    add di,y
+    cmp dx,di
     back5:
     int 10h
     inc dx
     inc dx
     inc dx 
-    cmp dx,y+10
+    mov di,10
+    add di,y
+    cmp dx,di
     jle back5;to draw the dotted line
     
 ENDM drawboostat
-
-
-Main proc far
-    mov ax,@data
-    mov ds,ax 
-    mov ah,0
-    mov al,13h
-    int 10h;change to video mode
-    
-    drawboostat 20,120
-    
-    
-    
-  
-    Main ENDP
-End Main
-    
