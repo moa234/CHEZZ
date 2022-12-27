@@ -8,8 +8,8 @@ Innum db 5,?,4 dup('$')
 Score db "Score$"
 winingmsg db "You Won $"
 losingmsg db  "You Lost $"
-uquitedmsg db  "You  Quited $"
-opquitedmsg db  "Opponent Quited $"
+uquitedmsg db  "You Quit $"
+opquitedmsg db  "Opponent Quits $"
 ;--------------------------------------------------
 MSG1 db "To start chatting press F1 $"
 MSG2 db "To start the game press F2 $" 
@@ -28,9 +28,11 @@ repetetionflag1 db 0
 repetetionflag2 db 0
 frommenutogame db 0
 frommenutochat db 0
+msg    db  'Please enter your name: $ ' 
+msg22  db  'Error, unauthorized characters are used, please enter a valid username:$'
 ;--------------------------------------------------
-myplayer db 16,?,16 dup('$')
-opponentplayer db 16,?,16 dup('$')
+myplayer db 15,?,15 dup('$')
+opponentplayer db 15,?,15 dup('$')
 ;--------------------------------------------------
 currpos dw 0
 row dw 0 ;0-7
@@ -98,6 +100,7 @@ include macros.inc
 include gameui.inc
 include gamelog.inc
 include menu.inc
+include users.inc
 
 .code
 
@@ -106,11 +109,11 @@ main proc far
     mov ds,ax
     
     ;call menu
-
+    call username
     ;cmp frommenutogame,1
     ;jne donotrungame
-    clearscreen
-    call game
+    ;clearscreen
+    ;call game
     ;after ret from game goto menu directly
 
     ;donotrungame:

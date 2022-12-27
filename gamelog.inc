@@ -2015,7 +2015,7 @@ game proc
 
         cmp opquited,1
         jne opnotquitedtillnow
-        MOVECURSOR 33-6,6
+        MOVECURSOR 31-6,6
         DisplayString opquitedmsg
         jmp gotomenu
 
@@ -2038,7 +2038,7 @@ game proc
         call GeneratePowerUp
 
         noneedtogeneratepowerup:
-        cmp mykingdead,1        ;TODO according to who won or lost display you won or you lost
+        cmp mykingdead,1      
         jne checkopking
         MOVECURSOR 35-6,6
         DisplayString losingmsg

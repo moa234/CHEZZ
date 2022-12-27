@@ -47,7 +47,7 @@ cmp gameinviteflag,1
 jne displayf2rec
 mov al,1
 mov frommenutogame,al
-ret
+call game
 displayf2rec:
 cmp repetetionflag2,0
 jne nogameresponse
@@ -58,31 +58,32 @@ mov al,1
 add repetetionflag2,1
 nogameresponse:
 
-
-mov ah,1
-int 16h
+getKeyPress
+clearbuffer
 cmp al,1bh ; =ESC
 jne donotexitnow
 jmp exit2
 donotexitnow:
 mov bl,1
-cmp invitationflag,bl
-je SkipNewInvitation  ;dont make a new invitation unless the previous one recieves a response (make flag =0, when a response is recieved)
+cmp chatinviteflag,bl
+je skipnewchatinvitation  ;dont make a new invitation unless the previous one recieves a response (make flag =0, when a response is recieved)
 
 cmp ah,3bh ; =F1
 jne skipnewchatinvitation
 mov bl,1
 mov chatinviteflag,bl
-mov invitationflag,bl
 call sendchatinvitation
 jmp printF1notif
 
 SkipNewChatInvitation:
+mov bl,1
+cmp gameinviteflag,bl
+je skipnewinvitation  
 cmp ah,3ch ; =F2
 jne SkipNewInvitation
 mov bl,1
 mov gameinviteflag,bl
-mov invitationflag,bl
+
 call sendgameinvitation
 jmp printF2notif
 
@@ -103,9 +104,12 @@ DisplayString F2notif
 jmp myloop
 exit2:
 
-;TODO Terminate code
-    
-;SHOULD MAKE A PATH FROM MYLOOP TO THE GAME WHEN THE OTHER USER ACCEPTS THE INVITATION [SIMULATED IN PHASE 1]
+clearscreen
+MOVECURSOR 0,0
+MOV AH, 4CH
+MOV AL, 00    ;your return code.
+INT 21H
+
 popa
 ret                     
 menu ENDP
